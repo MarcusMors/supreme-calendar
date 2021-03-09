@@ -1,3 +1,5 @@
 .vscode
 .pytest_cache
 token.pickle
+node_modules
+token.json

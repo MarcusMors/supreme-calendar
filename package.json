@@ -1,0 +1,17 @@
+{
+  "name": "calendar",
+  "version": "1.0.0",
+  "description": "automatize my calendar",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "calendar-API"
+  ],
+  "author": "José Vilca Campana <@marcusmors>",
+  "license": "ISC",
+  "dependencies": {
+    "googleapis": "^39.2.0"
+  }
+}
