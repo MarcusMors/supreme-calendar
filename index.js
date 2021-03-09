@@ -16,11 +16,13 @@ fs.readFile("credentials.json", (err, content) => {
 	if (err) return console.log("Error loading client secret file:", err)
 	// Authorize a client with credentials, then call the Google Calendar API.
 	authorize(JSON.parse(content), listEvents)
+	authorize(JSON.parse(content), listCalendarss)
 })
 
 /**
- * Create an OAuth2 client with the given credentials, and then execute the
- * given callback function.
+ * given callback functio
+	*               function(err) { console.error("Execute error", err); )
+
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
@@ -75,6 +77,19 @@ function getAccessToken(oAuth2Client, callback) {
  * Lists the next 10 events on the user's primary calendar.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
+
+function listCalendarss(auth) {
+	const calendar = google.calendar({ version: "v3", auth })
+	calendar.calendarList.list({}).then(
+		function (response) {
+			console.log("CalendarList\n", response)
+		},
+		function (err) {
+			console.error("Execute error", err)
+		}
+	)
+}
+
 function listEvents(auth) {
 	const calendar = google.calendar({ version: "v3", auth })
 	calendar.events.list(
