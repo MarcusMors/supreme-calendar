@@ -1,16 +1,22 @@
-﻿#My Calendar
-##Main Objectives
+﻿# My Calendar
+
+## Main Objectives
 
 -   Avoid re-Schedule events or events that can't happen at the same time.
 -   Schedule primary activities (learning, practicing, etc).
 -   Separate a minimun time for my hobbies, laissure activities and social life.
 
-##Secondary Objectives
+## Secondary Objectives
 
 -   Schedule secondary activities with the rest of the time.
 -   Schedule commuting time
 
-###Priority System
+## Event vs Task
+
+event : pass even thought you aren't there
+task : you can do, in a plaze of time
+
+### Priority System
 
 1.  Assure main objectives (#1,#2,#3)
 2.  Schedule commuting time and backup time if necessary
@@ -23,25 +29,34 @@
 
 ### Hierachie of Priorities
 
-###### 0. Commuting time and backup time (time to go somewhere and return)
+##### 0. Commuting time and backup time (time to go somewhere and return)
 
-###### 1. Mine and University's events (must be there events)
+if an event can happen during other event of lower or higher Priority, must end in +#Priority-number
+
+two types of activities:
+compatible with other events
+incompatible
+
+botton quieres vas a volver ahora?
+voy a volver antes de las 5:00pm
+
+##### 1. Mine and University's events (must be there events)
 
     If I need to go somewhere
     	Calculate commuting time
     Else
     	No commuting time needed
 
-###### 2. Physiological needs (sleeping and taking a bath)
+##### 2. Physiological needs (sleeping and taking a bath)
 
-###### 3. Meal Time
+##### 3. Meal Time
 
     If I am at home
     	No commuting time needed
     Else
     	Calculate commuting time
 
-###### 4. Exercise
+##### 4. Exercise
 
     If Today I must work out abs and legs
     	Can be done regardless I am at home or not.
@@ -53,7 +68,7 @@
     Else
     	I must be at home
 
-###### 5. Metacognition
+##### 5. Metacognition
 
 Priority: Must happen
 
@@ -82,17 +97,30 @@ Can be done while
 
 ###### 6. Main Activities
 
+Priority: Must happen
+When: variable
+Longs: depending on the remaining time and the minimum time for my Hobbies and Leisure
 Activities
 
--   E-learning(90 min, can be interrupted)
--   a (long time, needs preparation and shouldn't be interrupted)
--   b ()
--   c
+-   Research more the university topics (90 min minimum)
+-   E-learning(90 - 180 min, can be interrupted)
+-   Learn and practice another language (long time, needs preparation and shouldn't be interrupted)
+-   Learn and code (1h at least, can be interrupted if it's longer than that)
+-   Home Duties
+    -   daily
+        -   Feed the pets (task, no reminder needed)
+        -   Help mom in something (wash the dishes, etc) (30 min at least)
+    -   Weekly
+        -   Sweep and mop the second floor (30 min)
+        -   Clean pet poop (task, reminder needed)
+    -   Occasionally
+        -   Water the plants in my balcony (every 5 days)
+        -   Walk the dog (two or three times a week)
 
-###### 7. Hobbies and Laissure
+##### 7. Hobbies and Leisure
 
-weekly minimum time: 300 min
-daily minimum time: 15 min
+######weekly minimum time: 300 min
+######daily minimum time: 15 min
 
 Activities:
 
@@ -109,18 +137,4 @@ Activities:
 -   Make Diagrams
 -   Document my projects
 -   Social Media Production
-
-if an event can be during other event of lower or higher Priority, must end in +#Priority-number
-
-event : pass even thought you aren't there
-task : you can do, in a plaze of time
-two types of activities:
-compatible with other events
-incompatible
-
-botton quieres vas a volver ahora?
-voy a volver antes de las 5:00pm
-
-exercise:
-must be at home (push up and pull up)
-can be done anywhere (running and abs)
+-   Watch news
