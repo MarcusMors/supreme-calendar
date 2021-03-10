@@ -29,7 +29,7 @@ task : you can do, in a plaze of time
 
 ### Hierachie of Priorities
 
-##### 0. Commuting time and backup time (time to go somewhere and return)
+##### 0. Commuting time and backup time (time to go somewhere or return home)
 
 if an event can happen during other event of lower or higher Priority, must end in +#Priority-number
 
@@ -37,8 +37,8 @@ two types of activities:
 compatible with other events
 incompatible
 
-botton quieres vas a volver ahora?
-voy a volver antes de las 5:00pm
+notification: you got no event right know, will you come home?
+Yes - in half an hour - in an hour - before X time (specify the maximum hour)
 
 ##### 1. Mine and University's events (must be there events)
 
@@ -48,6 +48,11 @@ voy a volver antes de las 5:00pm
     	No commuting time needed
 
 ##### 2. Physiological needs (sleeping and taking a bath)
+
+    If I will be in home
+    	No commuting time needed
+    Else
+    	Calculate commuting time
 
 ##### 3. Meal Time
 
@@ -102,6 +107,7 @@ When: variable
 Longs: depending on the remaining time and the minimum time for my Hobbies and Leisure
 Activities
 
+-   Studying what I already know and homework (> 120 min)
 -   Research more the university topics (90 min minimum)
 -   E-learning(90 - 180 min, can be interrupted)
 -   Learn and practice another language (long time, needs preparation and shouldn't be interrupted)

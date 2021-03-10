@@ -81,6 +81,8 @@ function getAccessToken(oAuth2Client, callback) {
 let lowestPriority = -1
 let totalCalendars = 0
 let calendarsId = []
+let wasLastEventOutside
+let headingHome
 function listCalendars(auth) {
 	const calendar = google.calendar({ version: "v3", auth })
 	calendar.calendarList.list({}).then(
