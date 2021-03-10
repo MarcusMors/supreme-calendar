@@ -1,6 +1,7 @@
 const fs = require("fs")
 const readline = require("readline")
 const { google } = require("googleapis")
+const today = new Date()
 
 // If modifying these scopes, delete token.json.
 const SCOPES = [
@@ -72,17 +73,58 @@ function getAccessToken(oAuth2Client, callback) {
 		})
 	})
 }
-
 /**
  * Lists the next 10 events on the user's primary calendar.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 
+let lowestPriority = -1
+let totalCalendars = 0
+let calendarsId = []
 function listCalendars(auth) {
 	const calendar = google.calendar({ version: "v3", auth })
 	calendar.calendarList.list({}).then(
 		function (response) {
-			console.log("CalendarList\n", response)
+			let itemIndexHolder = []
+
+			console.log("Data:\n", response.data)
+			console.log(`Data length : ${response.data.items.length}`)
+
+			for (let i = 0; i < response.data.items.length; i++) {
+				const element = response.data.items[i].summary.slice(-1)
+				if (element > -1 && element < 10) {
+					itemIndexHolder[totalCalendars] = i
+					totalCalendars++
+					if (element > lowestPriority) {
+						lowestPriority = element
+					}
+				}
+			}
+			for (let i = 0; i < lowestPriority + 1; i++) {
+				calendarsId[i] = []
+			}
+			console.log(`totalCalendars : ${totalCalendars}`)
+			console.log(`lowestPriority : ${lowestPriority}`)
+			for (let i = 0; i < totalCalendars; i++) {
+				const indexHolder = itemIndexHolder[i]
+				for (let j = 0; j < +lowestPriority + 1; j++) {
+					if (
+						+response.data.items[indexHolder].summary.slice(-1) ===
+						j
+					) {
+						calendarsId[j].push(response.data.items[indexHolder].id)
+					}
+				}
+			}
+
+			console.log(`calendarsId`)
+
+			for (let i = 0; i < +lowestPriority + 1; i++) {
+				console.log(`[${i}]:`)
+				for (let j = 0; j < calendarsId[i].length; j++) {
+					console.log(`[${i}][${j}] : ${calendarsId[i][j]}`)
+				}
+			}
 		},
 		function (err) {
 			console.error("Execute error", err)
@@ -92,26 +134,35 @@ function listCalendars(auth) {
 
 function listEvents(auth) {
 	const calendar = google.calendar({ version: "v3", auth })
-	calendar.events.list(
-		{
-			calendarId: "primary",
-			timeMin: new Date().toISOString(),
-			maxResults: 10,
-			singleEvents: true,
-			orderBy: "startTime",
-		},
-		(err, res) => {
-			if (err) return console.log("The API returned an error: " + err)
-			const events = res.data.items
-			if (events.length) {
-				console.log("Upcoming 10 events:")
-				events.map((event, i) => {
-					const start = event.start.dateTime || event.start.date
-					console.log(`${start} - ${event.summary}`)
-				})
-			} else {
-				console.log("No upcoming events found.")
-			}
+
+	for (let i = 1; i < +lowestPriority + 1; i++) {
+		for (let j = 0; j < calendarsId[i].length; j++) {
+			calendar.events.list(
+				{
+					calendarId: calendarsId[i][j],
+					timeMin: new Date().toISOString(),
+					maxResults: 10,
+					singleEvents: true,
+					orderBy: "startTime",
+				},
+				(err, res) => {
+					if (err)
+						return console.log("The API returned an error: " + err)
+					const events = res.data.items
+					if (events.length) {
+						console.log("Upcoming 10 events:")
+						events.map((event, i) => {
+							const start =
+								event.start.dateTime || event.start.date
+							console.log(
+								`${start} - ${event.summary}\n${event.id}`
+							)
+						})
+					} else {
+						console.log("No upcoming events found.")
+					}
+				}
+			)
 		}
-	)
+	}
 }
