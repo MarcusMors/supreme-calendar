@@ -14,7 +14,7 @@
 ## Event vs Task
 
 event : pass even thought you aren't there
-task : you can do, in a plaze of time
+task : you can do it in a period of time
 
 ### Priority System
 
@@ -42,19 +42,34 @@ Yes - in half an hour - in an hour - before X time (specify the maximum hour)
 
 ##### 1. Mine and University's events (must be there events)
 
-    If I need to go somewhere
-    	Calculate commuting time
-    Else
-    	No commuting time needed
+    Description
+    	Commuting:x from last location
+    	early:x time to be in the event before it starts
+    	returnHome:x time to go home
+    	commuteAfter:x hout to start commuting
+    	commuteBefore:x hour to end commuting
+    	compatible:[array of activities]
 
 ##### 2. Physiological needs (sleeping and taking a bath)
 
-    If I will be in home
+incompatible
+2 types of event:
+
+-   sleeping time
+-   Take a bath
+
+a
+
+    where I will go?
+    If I am in home
     	No commuting time needed
     Else
     	Calculate commuting time
 
 ##### 3. Meal Time
+
+Description
+commuting:x time
 
     If I am at home
     	No commuting time needed
@@ -63,13 +78,11 @@ Yes - in half an hour - in an hour - before X time (specify the maximum hour)
 
 ##### 4. Exercise
 
+    legs and abs description
+    	alsoCommuting:Bool (do: multiply the commuting time)
+
     If Today I must work out abs and legs
     	Can be done regardless I am at home or not.
-
-    		If I will run home today
-    			commuting time is the exercise time and should be longer
-    		Else
-    			commuting time and exercise time aren't compatible
     Else
     	I must be at home
 
@@ -90,7 +103,7 @@ When
 Can be done while
 
 -   Commuting
--   Eating
+-   Any event in Meal Calendar
 
 5 types
 
@@ -109,9 +122,9 @@ Activities
 
 -   Studying what I already know and homework (> 120 min)
 -   Research more the university topics (90 min minimum)
--   E-learning(90 - 180 min, can be interrupted)
--   Learn and practice another language (long time, needs preparation and shouldn't be interrupted)
--   Learn and code (1h at least, can be interrupted if it's longer than that)
+-   E-learning(90 - 180 min, interruptible)
+-   Learn and practice another language (long time, needs preparation and not interruptible)
+-   Learn and code (1h at least, Interruptible if it's longer than that)
 -   Home Duties
     -   daily
         -   Feed the pets (task, no reminder needed)
@@ -137,7 +150,7 @@ Activities:
 -   Paint (30 min at least)
 -   Write (45 min at least)
 
-###### 8. Secondary Activities
+##### 8. Secondary Activities
 
 -   Investigate
 -   Make Diagrams
