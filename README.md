@@ -29,64 +29,68 @@ task : you can do it in a period of time
 
 ### Hierachie of Priorities
 
-##### 0. Commuting time and backup time (time to go somewhere or return home)
-
-if an event can happen during other event of lower or higher Priority, must end in +#Priority-number
-
-two types of activities:
-compatible with other events
-incompatible
-
-notification: you got no event right know, will you come home?
-Yes - in half an hour - in an hour - before X time (specify the maximum hour)
-
-##### 1. Mine and University's events (must be there events)
+##### 0. Mine and University's events (must be there events)
 
     Description
     	Commuting:x from last location
     	early:x time to be in the event before it starts
     	returnHome:x time to go home
-    	commuteAfter:x hout to start commuting
+    	commuteAfter:x hour to start commuting
     	commuteBefore:x hour to end commuting
     	compatible:[array of activities]
 
-##### 2. Physiological needs (sleeping and taking a bath)
+##### 1. Physiological needs (sleeping and taking a bath)
 
-incompatible
-2 types of event:
+3 types of event:
 
--   sleeping time
+-   Sleeping time
+    -   condition: must be at home
 -   Take a bath
+    -   condition: must be at home
+-   Meals
 
-a
+    -   Breakfast
+    -   Lunch
+    -   Dinner
 
-    where I will go?
-    If I am in home
-    	No commuting time needed
-    Else
-    	Calculate commuting time
+    Description
 
-##### 3. Meal Time
+    -   commuting : x time
+    -   mealAfter : x time
+    -   mealBefore : x time
+    -   compatibleWith : [array of events],[array of activities]
+
+##### 2. Commuting time and backup time (time to go somewhere or return home)
 
 Description
-commuting:x time
 
-    If I am at home
-    	No commuting time needed
-    Else
-    	Calculate commuting time
+-   compatibleWith: [array of activities]
 
-##### 4. Exercise
+if an event can happen during other event of lower or higher Priority, must end in +#Priority-number
 
-    legs and abs description
-    	alsoCommuting:Bool (do: multiply the commuting time)
+notification: you got no event right know, will you come home?
+Yes - in half an hour - in an hour - before X time (specify the maximum hour)
 
-    If Today I must work out abs and legs
-    	Can be done regardless I am at home or not.
-    Else
-    	I must be at home
+##### 3. Exercise
 
-##### 5. Metacognition
+3 types of exercise routine:
+
+-   push up & back
+    Condition:
+    -   be at home
+-   legs & abs
+    Description
+    -   andCommuting:bool (multiply the next event commuting time by 1.5)
+    -   andReturningHome:bool (multiply the return commuting time by 1.5)
+-   pull up & chest
+    Condition:
+    -   be at home
+
+General Preferences:
+
+-   before studying
+
+##### 4. Metacognition & Planning
 
 Priority: Must happen
 
@@ -105,15 +109,14 @@ Can be done while
 -   Commuting
 -   Any event in Meal Calendar
 
-5 types
+4 Activities
 
--   daily (can be accompannied by another one)
--   yesterday
+-   daily (night, accompanied by another one)
+-   yesterday (day, accompanied by another one)
 -   week ago
 -   month ago
--   year ago
 
-###### 6. Main Activities
+##### 5. Main Activities
 
 Priority: Must happen
 When: variable
@@ -136,7 +139,7 @@ Activities
         -   Water the plants in my balcony (every 5 days)
         -   Walk the dog (two or three times a week)
 
-##### 7. Hobbies and Leisure
+##### 6. Hobbies and Leisure
 
 ######weekly minimum time: 300 min
 ######daily minimum time: 15 min
@@ -150,7 +153,7 @@ Activities:
 -   Paint (30 min at least)
 -   Write (45 min at least)
 
-##### 8. Secondary Activities
+##### 7. Secondary Activities
 
 -   Investigate
 -   Make Diagrams
