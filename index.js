@@ -1,8 +1,11 @@
 const fs = require("fs")
 const readline = require("readline")
 const { google } = require("googleapis")
-const today = new Date()
-
+let lowestPriority = -1
+let totalCalendars = 0
+let calendarsId = []
+let wasLastEventOutside
+let headingHome
 // If modifying these scopes, delete token.json.
 const SCOPES = [
 	"https://www.googleapis.com/auth/calendar.addons.current.event.write",
@@ -16,16 +19,16 @@ const TOKEN_PATH = "token.json"
 fs.readFile("credentials.json", (err, content) => {
 	if (err) return console.log("Error loading client secret file:", err)
 	// Authorize a client with credentials, then call the Google Calendar API.
-	authorize(JSON.parse(content), listEvents)
 	authorize(JSON.parse(content), listCalendars)
+	authorize(JSON.parse(content), listEvents)
 })
 
 /**
- * given callback functio
+ * given callback function
 	*               function(err) { console.error("Execute error", err); )
 
- * @param {Object} credentials The authorization client credentials.
- * @param {function} callback The callback to call with the authorized client.
+	* @param {Object} credentials The authorization client credentials.
+	* @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
 	const { client_secret, client_id, redirect_uris } = credentials.installed
@@ -78,12 +81,8 @@ function getAccessToken(oAuth2Client, callback) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 
-let lowestPriority = -1
-let totalCalendars = 0
-let calendarsId = []
-let wasLastEventOutside
-let headingHome
 function listCalendars(auth) {
+	console.log("listEventsOriginal...")
 	const calendar = google.calendar({ version: "v3", auth })
 	calendar.calendarList.list({}).then(
 		function (response) {
@@ -124,8 +123,118 @@ function listCalendars(auth) {
 			for (let i = 0; i < +lowestPriority + 1; i++) {
 				console.log(`[${i}]:`)
 				for (let j = 0; j < calendarsId[i].length; j++) {
-					console.log(`[${i}][${j}] : ${calendarsId[i][j]}`)
+					console.log(
+						`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`
+					)
 				}
+			}
+			console.log(`\ncheck #9 events \n`)
+			if (+lowestPriority === 9) {
+				for (let i = 0; i < calendarsId[9].length; i++) {
+					const originalCalendarId = calendarsId[9][i]
+					calendar.events.list(
+						{
+							calendarId: calendarsId[9][i],
+							timeMin: new Date().toISOString(),
+							// timeMax: new Date().toISOString(),
+							maxResults: 16,
+							singleEvents: true,
+							orderBy: "startTime",
+						},
+						(err, res) => {
+							if (err)
+								return console.log(
+									"The API returned an error: " + err
+								)
+							const events = res.data.items
+							if (events.length) {
+								console.log("Upcoming 10 events:")
+								events.map((event, i) => {
+									const start =
+										event.start.dateTime || event.start.date
+									const end =
+										event.end.dateTime || event.end.date
+									console.log(
+										`#9\t${start} - ${end} | ${event.summary}\n${event.id}`
+									)
+								})
+							} else {
+								console.log("No upcoming events found.")
+							}
+						}
+					)
+					//!
+					calendar.events
+						.import({
+							calendarId: "jose.vilca.campana@ucsp.edu.pe",
+							conferenceDataVersion: 1,
+							supportsAttachments: true,
+							resource: {
+								end: {
+									dateTime: "2021-03-18T19:00:00-05:00",
+								},
+								iCalUID:
+									"7271icgsli9agf9pvh3a2sd4io_20210318T214500Z",
+								start: {
+									dateTime: "2021-03-18T16:45:00-05:00",
+								},
+								summary: "this is a summary example",
+							},
+						})
+						.then(
+							function (response) {
+								// Handle the results here (response.result has the parsed body).
+								console.log("Response", response)
+							},
+							function (err) {
+								console.error("Execute error", err)
+							}
+						)
+					// }
+					// gapi.load("client:auth2", function() {
+					//   gapi.auth2.init({client_id: "YOUR_CLIENT_ID"});
+					// });
+					//!
+				}
+			}
+			console.log(`check all events`)
+			for (let i = 0; i < +lowestPriority + 1; i++) {
+				for (let j = 0; j < calendarsId[i].length; j++) {
+					console.log(
+						`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`
+					)
+					calendar.events.list(
+						{
+							calendarId: calendarsId[i][j],
+							timeMin: new Date().toISOString(),
+							maxResults: 10,
+							singleEvents: true,
+							orderBy: "startTime",
+						},
+						(err, res) => {
+							if (err)
+								return console.log(
+									"The API returned an error: " + err
+								)
+							const events = res.data.items
+							if (events.length) {
+								console.log("Upcoming 10 events:")
+								events.map((event, i) => {
+									const start =
+										event.start.dateTime || event.start.date
+									const end =
+										event.end.dateTime || event.end.date
+									console.log(
+										`${start} - ${end} | ${event.summary}\n${event.id}`
+									)
+								})
+							} else {
+								console.log("No upcoming events found.")
+							}
+						}
+					)
+				}
+				console.log(`\t\t<--No more events in ${i} priority-->`)
 			}
 		},
 		function (err) {
@@ -135,36 +244,28 @@ function listCalendars(auth) {
 }
 
 function listEvents(auth) {
+	console.log("listEvents...")
 	const calendar = google.calendar({ version: "v3", auth })
-
-	for (let i = 1; i < +lowestPriority + 1; i++) {
-		for (let j = 0; j < calendarsId[i].length; j++) {
-			calendar.events.list(
-				{
-					calendarId: calendarsId[i][j],
-					timeMin: new Date().toISOString(),
-					maxResults: 10,
-					singleEvents: true,
-					orderBy: "startTime",
-				},
-				(err, res) => {
-					if (err)
-						return console.log("The API returned an error: " + err)
-					const events = res.data.items
-					if (events.length) {
-						console.log("Upcoming 10 events:")
-						events.map((event, i) => {
-							const start =
-								event.start.dateTime || event.start.date
-							console.log(
-								`${start} - ${event.summary}\n${event.id}`
-							)
-						})
-					} else {
-						console.log("No upcoming events found.")
-					}
-				}
-			)
+	calendar.events.list(
+		{
+			calendarId: "primary",
+			timeMin: new Date().toISOString(),
+			maxResults: 10,
+			singleEvents: true,
+			orderBy: "startTime",
+		},
+		(err, res) => {
+			if (err) return console.log("The API returned an error: " + err)
+			const events = res.data.items
+			if (events.length) {
+				console.log("Upcoming 10 events:")
+				events.map((event, i) => {
+					const start = event.start.dateTime || event.start.date
+					console.log(`${start} - ${event.summary}`)
+				})
+			} else {
+				console.log("No upcoming events found.")
+			}
 		}
-	}
+	)
 }
