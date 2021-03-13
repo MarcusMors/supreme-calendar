@@ -82,13 +82,12 @@ function getAccessToken(oAuth2Client, callback) {
  */
 
 function listCalendars(auth) {
-	console.log("listEventsOriginal...")
+	console.log("listCalendars...")
 	const calendar = google.calendar({ version: "v3", auth })
 	calendar.calendarList.list({}).then(
 		function (response) {
 			let itemIndexHolder = []
 
-			console.log("Data:\n", response.data)
 			console.log(`Data length : ${response.data.items.length}`)
 
 			for (let i = 0; i < response.data.items.length; i++) {
@@ -104,8 +103,8 @@ function listCalendars(auth) {
 			for (let i = 0; i < lowestPriority + 1; i++) {
 				calendarsId[i] = []
 			}
-			console.log(`totalCalendars : ${totalCalendars}`)
-			console.log(`lowestPriority : ${lowestPriority}`)
+			console.log(`\ttotalCalendars : ${totalCalendars}`)
+			console.log(`\tlowestPriority : ${lowestPriority}`)
 			for (let i = 0; i < totalCalendars; i++) {
 				const indexHolder = itemIndexHolder[i]
 				for (let j = 0; j < +lowestPriority + 1; j++) {
@@ -118,7 +117,7 @@ function listCalendars(auth) {
 				}
 			}
 
-			console.log(`calendarsId`)
+			console.log(`\n\tcalendarsId :\n`)
 
 			for (let i = 0; i < +lowestPriority + 1; i++) {
 				console.log(`[${i}]:`)
@@ -128,10 +127,16 @@ function listCalendars(auth) {
 					)
 				}
 			}
-			console.log(`\ncheck #9 events \n`)
+
+			console.log(`\nImporting and moving Calendars#9 events...\n`)
+
 			if (+lowestPriority === 9) {
 				for (let i = 0; i < calendarsId[9].length; i++) {
 					const originalCalendarId = calendarsId[9][i]
+					let eventsStart = []
+					let eventsEnd = []
+					let eventsId = []
+					let eventsSummary = []
 					calendar.events.list(
 						{
 							calendarId: calendarsId[9][i],
@@ -153,51 +158,27 @@ function listCalendars(auth) {
 									const start =
 										event.start.dateTime || event.start.date
 									const end =
-										event.end.dateTime || event.end.date
+										event.end.dateTime || event.end.dat
+									const id = event.id
+									const summary = event.summary
 									console.log(
-										`#9\t${start} - ${end} | ${event.summary}\n${event.id}`
+										`#9\t${start} - ${end} | ${summary}\n${id}`
 									)
+									eventsStart.push(start)
+									eventsEnd.push(end)
+									eventsId.push(id)
+									eventsSummary.push(summary)
 								})
 							} else {
 								console.log("No upcoming events found.")
 							}
 						}
 					)
-					//!
-					calendar.events
-						.import({
-							calendarId: "jose.vilca.campana@ucsp.edu.pe",
-							conferenceDataVersion: 1,
-							supportsAttachments: true,
-							resource: {
-								end: {
-									dateTime: "2021-03-18T19:00:00-05:00",
-								},
-								iCalUID:
-									"7271icgsli9agf9pvh3a2sd4io_20210318T214500Z",
-								start: {
-									dateTime: "2021-03-18T16:45:00-05:00",
-								},
-								summary: "this is a summary example",
-							},
-						})
-						.then(
-							function (response) {
-								// Handle the results here (response.result has the parsed body).
-								console.log("Response", response)
-							},
-							function (err) {
-								console.error("Execute error", err)
-							}
-						)
-					// }
-					// gapi.load("client:auth2", function() {
-					//   gapi.auth2.init({client_id: "YOUR_CLIENT_ID"});
-					// });
-					//!
 				}
+			} else {
+				console.log(`There aren't #9 Calendars to import and move`)
 			}
-			console.log(`check all events`)
+			console.log(`Checking all events in all calendars`)
 			for (let i = 0; i < +lowestPriority + 1; i++) {
 				for (let j = 0; j < calendarsId[i].length; j++) {
 					console.log(
@@ -218,7 +199,9 @@ function listCalendars(auth) {
 								)
 							const events = res.data.items
 							if (events.length) {
-								console.log("Upcoming 10 events:")
+								console.log(
+									`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
+								)
 								events.map((event, i) => {
 									const start =
 										event.start.dateTime || event.start.date
@@ -234,7 +217,7 @@ function listCalendars(auth) {
 						}
 					)
 				}
-				console.log(`\t\t<--No more events in ${i} priority-->`)
+				console.log(`\t\t<--  No more events in ${i} priority  -->`)
 			}
 		},
 		function (err) {
