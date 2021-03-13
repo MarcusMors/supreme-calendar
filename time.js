@@ -10,29 +10,4 @@ console.log(today)
 console.log(todayHours)
 console.log(todayMinutes)
 
-calendar.events
-	.import({
-		calendarId: originalCalendarId,
-		conferenceDataVersion: 1,
-		supportsAttachments: true,
-		resource: {
-			end: {
-				dateTime: end,
-			},
-			iCalUID: event.id,
-			start: {
-				dateTime: start,
-			},
-			summary: event.summary,
-		},
-	})
-	.then(
-		function (response) {
-			// Handle the results here (response.result has the parsed body).
-			console.log("Response", response)
-		},
-		function (err) {
-			console.error("Execute error", err)
-		}
-	)
 // calendar.events.move()
