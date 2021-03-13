@@ -87,81 +87,111 @@ let externalCalendarEventsId = []
 let externalCalendarEventsSummary = []
 let externalCalendarEventsStart = []
 let externalCalendarEventsEnd = []
+
 function importEvents(auth) {
+	console.log(`Importing Events...`)
 	const calendar = google.calendar({ version: "v3", auth })
-	calendar.calendarList.list({}).then(function (response) {
-		for (let i = 0; i < response.data.items.length; i++) {
-			const element = response.data.items[i].summary.slice(-1)
-			if (element === 9) {
-				externalCalendarsId[externalCalendarsCounter] =
-					response.data.items[i].id
-				externalCalendarsCounter++
-			}
-		}
-	})
-	for (let i = 0; i < externalCalendarsCounter; i++) {
-		const externalCalendarId = externalCalendarsId[i]
-		calendar.events.list(
-			{
-				calendarId: externalCalendarId,
-				timeMin: new Date().toISOString(),
-				maxResults: 16,
-				singleEvents: true,
-				orderBy: "startTime",
-			},
-			(err, res) => {
-				if (err) return console.log("The API returned an error: " + err)
-				const events = res.data.items
-				if (events.length) {
-					console.log("Upcoming 16 events:")
-					for (let j = 0; j < event.length; j++) {
-						const event = events[j]
-						const start = event.start.dateTime || event.start.date
-						const end = event.end.dateTime || event.end.date
-						const id = event.id
-						const summary = event.summary
-						externalCalendarEventsId[j] = id
-						externalCalendarEventsSummary[j] = summary
-						externalCalendarEventsStart[j] = start
-						externalCalendarEventsEnd[j] = end
-					}
-					events.map((event, i) => {
-						const start = event.start.dateTime || event.start.date
-						console.log(`${start} - ${event.summary}`)
-					})
-				} else {
-					console.log("No upcoming events found.")
+	console.log(`\tListing calendars...`)
+	calendar.calendarList
+		.list({})
+		.then(function (response) {
+			for (let i = 0; i < response.data.items.length; i++) {
+				const element = response.data.items[i].summary.slice(-1)
+				console.log(`\t\telement : ${element}`)
+				if (+element === 9) {
+					console.log(`\t\t#9 calendar found`)
+					externalCalendarsId[externalCalendarsCounter] =
+						response.data.items[i].id
+					externalCalendarsCounter++
 				}
 			}
-		)
-	}
-	for (let i = 0; i < externalCalendarsCounter; i++) {
-		const externalCalendarId = externalCalendarsId[i]
-		calendar.events
-			.import({
-				calendarId: externalCalendarId,
-				conferenceDataVersion: 1,
-				supportsAttachments: true,
-				resource: {
-					end: {
-						dateTime: externalCalendarEventsEnd[i],
-					},
-					iCalUID: externalCalendarEventsId[i],
-					start: {
-						dateTime: externalCalendarEventsStart[i],
-					},
-					summary: externalCalendarEventsSummary[i],
-				},
-			})
-			.then(
-				function (response) {
-					console.log("Response", response)
-				},
-				function (err) {
-					console.error("Execute error", err)
-				}
+		})
+		.then(() => {
+			console.log(
+				`\t\texternalCalendarsCounter : ${externalCalendarsCounter}`
 			)
-	}
+			for (let i = 0; i < externalCalendarsCounter; i++) {
+				const externalCalendar = externalCalendarsId[i]
+				console.log(`\t\texternalCalendar : ${externalCalendar}`)
+				externalCalendarEventsId[i] = []
+				externalCalendarEventsSummary[i] = []
+				externalCalendarEventsStart[i] = []
+				externalCalendarEventsEnd[i] = []
+			}
+		})
+		.then(() => {
+			console.log(`\tListing events`)
+			for (let i = 0; i < externalCalendarsCounter; i++) {
+				const externalCalendarId = externalCalendarsId[i]
+				calendar.events.list(
+					{
+						calendarId: externalCalendarId,
+						timeMin: new Date().toISOString(),
+						maxResults: 10,
+						singleEvents: true,
+						orderBy: "startTime",
+					},
+					(err, res) => {
+						if (err)
+							return console.log(
+								"The API returned an error: " + err
+							)
+						const events = res.data.items
+						if (events.length) {
+							console.log("Upcoming 10 events:")
+							events.map((event, j) => {
+								const start =
+									event.start.dateTime || event.start.date
+								const end = event.end.dateTime || event.end.date
+								const id = event.id
+								const summary = event.summary
+								externalCalendarEventsId[i][j] = id
+								externalCalendarEventsSummary[i][j] = summary
+								externalCalendarEventsStart[i][j] = start
+								externalCalendarEventsEnd[i][j] = end
+								console.log(
+									`${start} - ${end} | ${event.summary}`
+								)
+							})
+						} else {
+							console.log("No upcoming events found.")
+						}
+					}
+				)
+			}
+		})
+		.then(() => {
+			console.log(`\tImporting events`)
+			for (let i = 0; i < externalCalendarsCounter; i++) {
+				const externalCalendarId = externalCalendarsId[i]
+				for (let j = 0; j < externalCalendarEventsId.length; j++) {
+					calendar.events
+						.import({
+							calendarId: externalCalendarsId[i],
+							conferenceDataVersion: 1,
+							supportsAttachments: true,
+							resource: {
+								end: {
+									dateTime: externalCalendarEventsEnd[i][j],
+								},
+								iCalUID: externalCalendarEventsId[i][j],
+								start: {
+									dateTime: externalCalendarEventsStart[i][j],
+								},
+								summary: externalCalendarEventsSummary[i][j],
+							},
+						})
+						.then(
+							function (response) {
+								console.log("Response", response.status)
+							},
+							function (err) {
+								console.error("Execute error", err)
+							}
+						)
+				}
+			}
+		})
 }
 
 function listCalendars(auth) {
