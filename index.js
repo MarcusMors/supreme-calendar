@@ -133,8 +133,9 @@ const doImportEvents = async (auth) => {
 					orderBy: "startTime",
 				},
 				(err, res) => {
-					if (err)
+					if (err) {
 						return console.log("The API returned an error: " + err)
+					}
 					const events = res.data.items
 					if (events.length) {
 						console.log("\t\tUpcoming 10 events:")
