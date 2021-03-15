@@ -19,16 +19,15 @@ const TOKEN_PATH = "token.json"
 fs.readFile("credentials.json", (err, content) => {
 	if (err) return console.log("Error loading client secret file:", err)
 	// Authorize a client with credentials, then call the Google Calendar API.
-	authorize(JSON.parse(content), importEvents)
+	authorize(JSON.parse(content), importExternalEvents)
 	// authorize(JSON.parse(content), listCalendars)
 	// authorize(JSON.parse(content), listEvents)
 })
 /**
  * given callback function
-	*               function(err) { console.error("Execute error", err); )
-
-	* @param {Object} credentials The authorization client credentials.
-	* @param {function} callback The callback to call with the authorized client.
+ *               function(err) { console.error("Execute error", err); )
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
 	const { client_secret, client_id, redirect_uris } = credentials.installed
@@ -88,10 +87,54 @@ let externalCalendarEventsSummary = []
 let externalCalendarEventsStart = []
 let externalCalendarEventsEnd = []
 
-function importEvents(auth) {
+const searchExternalCalendars = (auth) => {
+	return new Promise((resolve, reject) => {
+		const calendar = google.calendar({ version: "v3", auth })
+		calendar.calendarList.list({}).then(function (response) {
+			for (let i = 0; i < response.data.items.length; i++) {
+				const element = response.data.items[i].summary.slice(-1)
+				console.log(`\t\telement : ${element}`)
+				if (+element === 9) {
+					console.log(`\t\t#9 calendar found`)
+					externalCalendarsId[externalCalendarsCounter] =
+						response.data.items[i].id
+					externalCalendarsCounter++
+				}
+			}
+		})
+		true
+			? resolve(`The search has been done successfully`)
+			: reject(new Error(`Looking for external xalendars error`))
+	})
+}
+
+const importEvents = (auth) => {
+	return new Promise((resolve, reject) => {
+		true ? resolve(`Events Imported`) : reject(new Error(`import error`))
+	})
+}
+
+const doImportEvents = async (auth) => {
+	try {
+		const searchExternalCalendarsAnswer = await searchExternalCalendars(
+			auth
+		)
+		const importEventsAnswer = await importEvents(auth)
+
+		console.log(importEventsAnswer)
+		console.log(searchExternalCalendarsAnswer)
+	} catch (error) {
+		console.error(error)
+	}
+}
+
+function importExternalEvents(auth) {
+	doImportEvents(auth)
+
 	console.log(`Importing Events...`)
 	const calendar = google.calendar({ version: "v3", auth })
 	console.log(`\tListing calendars...`)
+	/*
 	calendar.calendarList
 		.list({})
 		.then(function (response) {
@@ -120,7 +163,7 @@ function importEvents(auth) {
 			}
 		})
 		.then(() => {
-			console.log(`\tListing events`)
+			console.log(`\tListing events...`)
 			for (let i = 0; i < externalCalendarsCounter; i++) {
 				const externalCalendarId = externalCalendarsId[i]
 				calendar.events.list(
@@ -138,21 +181,31 @@ function importEvents(auth) {
 							)
 						const events = res.data.items
 						if (events.length) {
-							console.log("Upcoming 10 events:")
+							console.log("\t\tUpcoming 10 events:")
 							events.map((event, j) => {
 								const start =
 									event.start.dateTime || event.start.date
 								const end = event.end.dateTime || event.end.date
 								const id = event.id
 								const summary = event.summary
-								externalCalendarEventsId[i][j] = id
-								externalCalendarEventsSummary[i][j] = summary
-								externalCalendarEventsStart[i][j] = start
-								externalCalendarEventsEnd[i][j] = end
+								externalCalendarEventsId[i].push(id)
+								externalCalendarEventsSummary[i].push(summary)
+								externalCalendarEventsStart[i].push(start)
+								externalCalendarEventsEnd[i].push(end)
 								console.log(
-									`${start} - ${end} | ${event.summary}`
+									`\t\t${start} - ${end} | ${event.summary}`
 								)
 							})
+							console.log(`\tChecking the arrays`)
+							for (
+								let j = 0;
+								j < externalCalendarEventsId[i].length;
+								j++
+							) {
+								console.log(
+									`\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}\n\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\n\t\texternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\n\t\texternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\n`
+								)
+							}
 						} else {
 							console.log("No upcoming events found.")
 						}
@@ -163,8 +216,14 @@ function importEvents(auth) {
 		.then(() => {
 			console.log(`\tImporting events`)
 			for (let i = 0; i < externalCalendarsCounter; i++) {
-				const externalCalendarId = externalCalendarsId[i]
-				for (let j = 0; j < externalCalendarEventsId.length; j++) {
+				console.log(
+					`externalCalendarsId[${i}] : ${externalCalendarsId[i]}\nexternalCalendarEventsId[${i}].length : ${externalCalendarEventsId[i].length}`
+				)
+				for (let j = 0; j < externalCalendarEventsId[i].length; j++) {
+					console.log(
+						`externalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\nexternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\nexternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\nexternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}`
+					)
+					/*
 					calendar.events
 						.import({
 							calendarId: externalCalendarsId[i],
@@ -183,15 +242,19 @@ function importEvents(auth) {
 						})
 						.then(
 							function (response) {
-								console.log("Response", response.status)
+								console.log(`\n\n\n\n\n\n\n\n\n`)
+								console.log(`Response:`)
+								console.log(`\n\n\n\n\n\n\n\n\n`)
+								console.log(`Response: ${response}`)
 							},
 							function (err) {
 								console.error("Execute error", err)
 							}
 						)
+					}
 				}
-			}
-		})
+			})
+	*/
 }
 
 function listCalendars(auth) {
