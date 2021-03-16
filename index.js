@@ -120,7 +120,6 @@ const doImportEvents = async (auth) => {
 		)
 		for (let i = 0; i < externalCalendarsCounter; i++) {
 			const externalCalendarId = externalCalendarsId[i]
-			console.log(`look at this ->>>`, new Date().toISOString())
 			const externalCalendarEventsResponse = await calendar.events.list({
 				calendarId: externalCalendarId,
 				timeMin: new Date().toISOString(),
@@ -168,23 +167,22 @@ const doImportEvents = async (auth) => {
 				} else {
 					console.log(`No events Found`)
 				}
+			} else {
+				console.log(
+					`There was an error while listing that calendar events`
+				)
 			}
 		}
 		console.log(
 			`\t\texternalCalendarEventsId[0].length : ${externalCalendarEventsId[0].length}`
 		)
-		await setTimeout(
-			() => console.log(`After Listing External calendar events...`),
-			1000
-		)
-		await setTimeout(() => console.log(`Before Importing events...`), 1000)
 		console.log(`\tImporting events`)
 		for (let i = 0; i < externalCalendarsCounter; i++) {
 			console.log(
 				`\t\texternalCalendarsId[${i}] : ${externalCalendarsId[i]}`
 			)
 			console.log(
-				`\t\texternalCalendarEventsId[${i}].length : ${externalCalendarEventsId[i].length}`
+				`\t\texternalCalendarEventsId[${i}].length : ${externalCalendarEventsId[i].length}\n`
 			)
 			for (let j = 0; j < externalCalendarEventsId[i].length; j++) {
 				console.log(
@@ -207,13 +205,13 @@ const doImportEvents = async (auth) => {
 						},
 					}
 				)
+
 				console.log(`\n\n\n\n\n\n\n\n\n`)
 				console.log(`Response:`)
 				console.log(`\n\n\n\n\n\n\n\n\n`)
 				console.log(`Response: ${calendarEventImportResponse}`)
 			}
 		}
-		await setTimeout(() => console.log(`After Importing events...`), 1000)
 	} catch (error) {
 		console.error(error)
 	}
