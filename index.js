@@ -189,26 +189,12 @@ const doGetExternalCalendars = async (auth) => {
 				console.log(
 					`\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\n\t\texternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\n\t\texternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\n\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}`
 				)
-				// const calendarEventImportResponse = await calendar.events.import(
-				// 	{
-				// 		calendarId: externalCalendarsId[i],
-				// 		conferenceDataVersion: 1,
-				// 		supportsAttachments: true,
-				// 		resource: {
-				// 			end: {
-				// 				dateTime: externalCalendarEventsEnd[i][j],
-				// 			},
-				// 			iCalUID: externalCalendarEventsId[i][j],
-				// 			start: {
-				// 				dateTime: externalCalendarEventsStart[i][j],
-				// 			},
-				// 			summary: externalCalendarEventsSummary[i][j],
-				// 		},
-				// 	}
-				// )
+				console.log(
+					`\n{\n\tcalendarId: ${externalCalendarsId[i]},\n\tconferenceDataVersion: 1,\n\tsupportsAttachments: true,\n\tresource: {\n\t\tend: {\n\t\t\tdateTime: ${externalCalendarEventsEnd[i][j]},\n\t\t},\n\t\tiCalUID: ${externalCalendarEventsId[i][j]},\n\t\tstart: {\n\t\t\tdateTime: ${externalCalendarEventsStart[i][j]},\n\t\t},\n\t\tsummary: ${externalCalendarEventsSummary[i][j]},\n}\n,`
+				)
 				const calendarEventImportResponse = await calendar.events.import(
 					{
-						calendarId: "externalCalendarsId[i]",
+						calendarId: `${externalCalendarsId[i]}`,
 						conferenceDataVersion: 1,
 						supportsAttachments: true,
 						resource: {
