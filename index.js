@@ -82,12 +82,15 @@ function getAccessToken(oAuth2Client, callback) {
  */
 
 let externalCalendarsId = []
+let externalCalendarsSummary = []
 let externalCalendarsCounter = 0
 let externalCalendarEventsId = []
 let externalCalendarEventsSummary = []
 let externalCalendarEventsStart = []
 let externalCalendarEventsEnd = []
 let importedEventsId = []
+let copyCalendarsId = []
+let copyCalendarsSummary = []
 
 const doCopyCalendars = async (auth) => {
 	try {
@@ -98,13 +101,26 @@ const doCopyCalendars = async (auth) => {
 		console.log(`\tSearching External Calendars...`)
 		const calendarListResponse = await calendar.calendarList.list({})
 		for (let i = 0; i < calendarListResponse.data.items.length; i++) {
-			const element = calendarListResponse.data.items[i].summary.slice(-1)
-			console.log(`\t\telement : ${element}`)
-			if (+element === 9) {
+			const calendarItem = calendarListResponse.data.items[i]
+			const endLetter = calendarItem.summary.slice(-1)
+			console.log(`\t\tendLetter : ${endLetter}`)
+			if (+endLetter === 9) {
+				const summaryLength = calendarItem.summary.length
 				console.log(`\t\t#9 calendar found`)
-				externalCalendarsId[externalCalendarsCounter] =
-					calendarListResponse.data.items[i].id
+				externalCalendarsId[externalCalendarsCounter] = calendarItem.id
+				externalCalendarsSummary.push(
+					calendarItem.summary.slice(0, +summaryLength - 2)
+				)
 				externalCalendarsCounter++
+			} else {
+				const isTheCopy = calendarItem.summary.includes("copy")
+				if (isTheCopy) {
+					const summaryLength = calendarItem.summary.length
+					copyCalendarsId.push(calendarItem.id)
+					copyCalendarsSummary.push(
+						calendarItem.summary.slice(0, +summaryLength - 2)
+					)
+				}
 			}
 		}
 		console.log(
@@ -236,17 +252,45 @@ const doCopyCalendars = async (auth) => {
 		/*********************************************
 		 * Move the new events to the copy calendar
 		 *********************************************/
+		let copyCalendarId
+		for (let i = 0; i < externalCalendarsId.length; i++) {
+			console.log(`externalCalendarsId[i] : ${externalCalendarsId[i]}`)
+			console.log(`copyCalendarsId[i] : ${copyCalendarsId[i]}`)
+			for (let k = 0; k < copyCalendarsId.length; k++) {
+				const isTheCopy = copyCalendarsSummary[k].includes(
+					externalCalendarsSummary[i]
+				)
+				if (isTheCopy) {
+					copyCalendarId = copyCalendarsId[k]
+					console.log(
+						`${copyCalendarsSummary[k]} includes ${externalCalendarsSummary[i]}\ncopyCalendarId:${copyCalendarId}`
+					)
+				}
+			}
+		}
+
 		for (let i = 0; i < externalCalendarsCounter; i++) {
-			for (let i = 0; i < externalCalendarEventsId.length; i++) {
+			for (let k = 0; k < copyCalendarsId.length; k++) {
+				const isTheCopy = copyCalendarsSummary[k].includes(
+					externalCalendarsSummary[i]
+				)
+				if (isTheCopy) {
+					copyCalendarId = copyCalendarsId[k]
+					console.log(
+						`${copyCalendarsSummary[k]} includes ${externalCalendarsSummary[i]}\ncopyCalendarId:${copyCalendarId}`
+					)
+				}
+			}
+			for (let j = 0; j < externalCalendarEventsId.length; j++) {
 				const moveExternalCalendarToCopy = await calendar.events.move({
 					calendarId: `${externalCalendarsId[i]}`,
-					eventId: `${importedEvents[i][j]}`,
-					destination: ``,
+					eventId: `${importedEventsId[i][j]}`,
+					destination: `${copyCalendarId}`,
 				})
 				if (moveExternalCalendarToCopy) {
-					console.log("Response", response)
+					console.log("Response", moveExternalCalendarToCopy)
 				} else {
-					console.error("Execute error", err)
+					console.error("Move error")
 				}
 			}
 		}
