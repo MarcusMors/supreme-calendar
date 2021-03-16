@@ -1,6 +1,7 @@
 const fs = require("fs")
 const readline = require("readline")
 const { google } = require("googleapis")
+const { request } = require("http")
 let lowestPriority = -1
 let totalCalendars = 0
 let calendarsId = []
@@ -8,7 +9,7 @@ let wasLastEventOutside
 let headingHome
 // If modifying these scopes, delete token.json.
 const SCOPES = [
-	"https://www.googleapis.com/auth/calendar.addons.current.event.write",
+	"https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
 ]
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
@@ -19,7 +20,7 @@ const TOKEN_PATH = "token.json"
 fs.readFile("credentials.json", (err, content) => {
 	if (err) return console.log("Error loading client secret file:", err)
 	// Authorize a client with credentials, then call the Google Calendar API.
-	authorize(JSON.parse(content), importExternalEvents)
+	authorize(JSON.parse(content), getExternalCalendars)
 	// authorize(JSON.parse(content), listCalendars)
 	// authorize(JSON.parse(content), listEvents)
 })
@@ -87,7 +88,7 @@ let externalCalendarEventsSummary = []
 let externalCalendarEventsStart = []
 let externalCalendarEventsEnd = []
 
-const doImportEvents = async (auth) => {
+const doGetExternalCalendars = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
 		console.log(`\tSearching External Calendars...`)
@@ -188,24 +189,40 @@ const doImportEvents = async (auth) => {
 				console.log(
 					`\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\n\t\texternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\n\t\texternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\n\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}`
 				)
+				// const calendarEventImportResponse = await calendar.events.import(
+				// 	{
+				// 		calendarId: externalCalendarsId[i],
+				// 		conferenceDataVersion: 1,
+				// 		supportsAttachments: true,
+				// 		resource: {
+				// 			end: {
+				// 				dateTime: externalCalendarEventsEnd[i][j],
+				// 			},
+				// 			iCalUID: externalCalendarEventsId[i][j],
+				// 			start: {
+				// 				dateTime: externalCalendarEventsStart[i][j],
+				// 			},
+				// 			summary: externalCalendarEventsSummary[i][j],
+				// 		},
+				// 	}
+				// )
 				const calendarEventImportResponse = await calendar.events.import(
 					{
-						calendarId: externalCalendarsId[i],
+						calendarId: "externalCalendarsId[i]",
 						conferenceDataVersion: 1,
 						supportsAttachments: true,
 						resource: {
 							end: {
-								dateTime: externalCalendarEventsEnd[i][j],
+								dateTime: `${externalCalendarEventsEnd[i][j]}`,
 							},
-							iCalUID: externalCalendarEventsId[i][j],
+							iCalUID: `${externalCalendarEventsId[i][j]}`,
 							start: {
-								dateTime: externalCalendarEventsStart[i][j],
+								dateTime: `${externalCalendarEventsStart[i][j]}`,
 							},
-							summary: externalCalendarEventsSummary[i][j],
+							summary: `${externalCalendarEventsSummary[i][j]}`,
 						},
 					}
 				)
-
 				console.log(`\n\n\n\n\n\n\n\n\n`)
 				console.log(`Response:`)
 				console.log(`\n\n\n\n\n\n\n\n\n`)
@@ -217,9 +234,9 @@ const doImportEvents = async (auth) => {
 	}
 }
 
-function importExternalEvents(auth) {
-	console.log(`Importing Events...`)
-	doImportEvents(auth)
+function getExternalCalendars(auth) {
+	console.log(`GettingExternalCalendars...`)
+	doGetExternalCalendars(auth)
 }
 
 function listCalendars(auth) {
