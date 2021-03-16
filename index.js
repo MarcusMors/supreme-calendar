@@ -20,7 +20,7 @@ const TOKEN_PATH = "token.json"
 fs.readFile("credentials.json", (err, content) => {
 	if (err) return console.log("Error loading client secret file:", err)
 	// Authorize a client with credentials, then call the Google Calendar API.
-	authorize(JSON.parse(content), getExternalCalendars)
+	authorize(JSON.parse(content), copyExternalCalendars)
 	// authorize(JSON.parse(content), listCalendars)
 	// authorize(JSON.parse(content), listEvents)
 })
@@ -87,10 +87,14 @@ let externalCalendarEventsId = []
 let externalCalendarEventsSummary = []
 let externalCalendarEventsStart = []
 let externalCalendarEventsEnd = []
+let importedEventsId = []
 
-const doGetExternalCalendars = async (auth) => {
+const doCopyCalendars = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
+		/*********************************************
+		 * Import the events of the external calendars
+		 *********************************************/
 		console.log(`\tSearching External Calendars...`)
 		const calendarListResponse = await calendar.calendarList.list({})
 		for (let i = 0; i < calendarListResponse.data.items.length; i++) {
@@ -114,6 +118,7 @@ const doGetExternalCalendars = async (auth) => {
 			externalCalendarEventsSummary[i] = []
 			externalCalendarEventsStart[i] = []
 			externalCalendarEventsEnd[i] = []
+			importedEventsId[i] = []
 		}
 		console.log(`\tListing external calendar events...`)
 		console.log(
@@ -121,13 +126,17 @@ const doGetExternalCalendars = async (auth) => {
 		)
 		for (let i = 0; i < externalCalendarsCounter; i++) {
 			const externalCalendarId = externalCalendarsId[i]
+
 			const externalCalendarEventsResponse = await calendar.events.list({
 				calendarId: externalCalendarId,
 				timeMin: new Date().toISOString(),
-				maxResults: 6,
+				maxResults: 2,
 				singleEvents: true,
 				orderBy: "startTime",
 			})
+			/*********************************************
+			 * Import the events of the external calendars
+			 *********************************************/
 			if (externalCalendarEventsResponse) {
 				const events = externalCalendarEventsResponse.data.items
 				if (events.length) {
@@ -138,22 +147,31 @@ const doGetExternalCalendars = async (auth) => {
 						const id = event.id
 						const summary = event.summary
 						console.log(`\t\t${start} - ${end} | ${event.summary}`)
-						externalCalendarEventsId[i].push(id)
-						console.log(
-							`\t\t\texternalCalendarEventsId[${i}] : ${externalCalendarEventsId[i][j]}`
-						)
-						externalCalendarEventsSummary[i].push(summary)
-						console.log(
-							`\t\t\texternalCalendarEventsSummary[${i}] : ${externalCalendarEventsSummary[i]}`
-						)
-						externalCalendarEventsStart[i].push(start)
-						console.log(
-							`\t\t\texternalCalendarEventsSummary[${i}] : ${externalCalendarEventsSummary[i]}`
-						)
-						externalCalendarEventsEnd[i].push(end)
-						console.log(
-							`\t\t\texternalCalendarEventsSummary[${i}] : ${externalCalendarEventsSummary[i]}`
-						)
+						if (start.length != 10) {
+							/**	//TODO:
+							 * Filter the events that long more than a day and start or ends in a specific hour
+							 */
+							externalCalendarEventsId[i].push(id)
+							console.log(
+								`\t\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}`
+							)
+							externalCalendarEventsSummary[i].push(summary)
+							console.log(
+								`\t\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i]}`
+							)
+							externalCalendarEventsStart[i].push(start)
+							console.log(
+								`\t\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i]}`
+							)
+							externalCalendarEventsEnd[i].push(end)
+							console.log(
+								`\t\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i]}`
+							)
+						} else {
+							console.log(
+								`This event longs more the whole day or more`
+							)
+						}
 					})
 					console.log(`\tChecking the arrays`)
 					for (
@@ -178,6 +196,9 @@ const doGetExternalCalendars = async (auth) => {
 			`\t\texternalCalendarEventsId[0].length : ${externalCalendarEventsId[0].length}`
 		)
 		console.log(`\tImporting events`)
+		/*********************************************
+		 * Import the events of the external calendars
+		 *********************************************/
 		for (let i = 0; i < externalCalendarsCounter; i++) {
 			console.log(
 				`\t\texternalCalendarsId[${i}] : ${externalCalendarsId[i]}`
@@ -209,10 +230,24 @@ const doGetExternalCalendars = async (auth) => {
 						},
 					}
 				)
-				console.log(`\n\n\n\n\n\n\n\n\n`)
-				console.log(`Response:`)
-				console.log(`\n\n\n\n\n\n\n\n\n`)
-				console.log(`Response: ${calendarEventImportResponse}`)
+				importedEventsId[i].push(calendarEventImportResponse.data.id)
+			}
+		}
+		/*********************************************
+		 * Move the new events to the copy calendar
+		 *********************************************/
+		for (let i = 0; i < externalCalendarsCounter; i++) {
+			for (let i = 0; i < externalCalendarEventsId.length; i++) {
+				const moveExternalCalendarToCopy = await calendar.events.move({
+					calendarId: `${externalCalendarsId[i]}`,
+					eventId: `${importedEvents[i][j]}`,
+					destination: ``,
+				})
+				if (moveExternalCalendarToCopy) {
+					console.log("Response", response)
+				} else {
+					console.error("Execute error", err)
+				}
 			}
 		}
 	} catch (error) {
@@ -220,9 +255,9 @@ const doGetExternalCalendars = async (auth) => {
 	}
 }
 
-function getExternalCalendars(auth) {
-	console.log(`GettingExternalCalendars...`)
-	doGetExternalCalendars(auth)
+function copyExternalCalendars(auth) {
+	console.log(`Copying external calendars...`)
+	doCopyCalendars(auth)
 }
 
 function listCalendars(auth) {
@@ -236,7 +271,7 @@ function listCalendars(auth) {
 
 			for (let i = 0; i < response.data.items.length; i++) {
 				const element = response.data.items[i].summary.slice(-1)
-				if (element > -1 && element < 10) {
+				if (element > -1 && element < 9) {
 					itemIndexHolder[totalCalendars] = i
 					totalCalendars++
 					if (element > lowestPriority) {
