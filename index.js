@@ -114,61 +114,65 @@ const doImportEvents = async (auth) => {
 			externalCalendarEventsStart[i] = []
 			externalCalendarEventsEnd[i] = []
 		}
-		await setTimeout(
-			() => console.log(`Before Listing External calendar events...`),
-			1000
-		)
 		console.log(`\tListing external calendar events...`)
 		console.log(
 			`\t\texternalCalendarsCounter : ${externalCalendarsCounter}`
 		)
 		for (let i = 0; i < externalCalendarsCounter; i++) {
 			const externalCalendarId = externalCalendarsId[i]
-			await calendar.events.list(
-				{
-					calendarId: externalCalendarId,
-					timeMin: new Date().toISOString(),
-					maxResults: 10,
-					singleEvents: true,
-					orderBy: "startTime",
-				},
-				(err, res) => {
-					if (err) {
-						return console.log("The API returned an error: " + err)
+			console.log(`look at this ->>>`, new Date().toISOString())
+			const externalCalendarEventsResponse = await calendar.events.list({
+				calendarId: externalCalendarId,
+				timeMin: new Date().toISOString(),
+				maxResults: 6,
+				singleEvents: true,
+				orderBy: "startTime",
+			})
+			if (externalCalendarEventsResponse) {
+				const events = externalCalendarEventsResponse.data.items
+				if (events.length) {
+					console.log("\t\tUpcoming 6 events:")
+					events.map((event, j) => {
+						const start = event.start.dateTime || event.start.date
+						const end = event.end.dateTime || event.end.date
+						const id = event.id
+						const summary = event.summary
+						console.log(`\t\t${start} - ${end} | ${event.summary}`)
+						externalCalendarEventsId[i].push(id)
+						console.log(
+							`\t\t\texternalCalendarEventsId[${i}] : ${externalCalendarEventsId[i][j]}`
+						)
+						externalCalendarEventsSummary[i].push(summary)
+						console.log(
+							`\t\t\texternalCalendarEventsSummary[${i}] : ${externalCalendarEventsSummary[i]}`
+						)
+						externalCalendarEventsStart[i].push(start)
+						console.log(
+							`\t\t\texternalCalendarEventsSummary[${i}] : ${externalCalendarEventsSummary[i]}`
+						)
+						externalCalendarEventsEnd[i].push(end)
+						console.log(
+							`\t\t\texternalCalendarEventsSummary[${i}] : ${externalCalendarEventsSummary[i]}`
+						)
+					})
+					console.log(`\tChecking the arrays`)
+					for (
+						let j = 0;
+						j < externalCalendarEventsId[i].length;
+						j++
+					) {
+						console.log(
+							`\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}\n\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\n\t\texternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\n\t\texternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\n`
+						)
 					}
-					const events = res.data.items
-					if (events.length) {
-						console.log("\t\tUpcoming 10 events:")
-						events.map((event, j) => {
-							const start =
-								event.start.dateTime || event.start.date
-							const end = event.end.dateTime || event.end.date
-							const id = event.id
-							const summary = event.summary
-							externalCalendarEventsId[i].push(id)
-							externalCalendarEventsSummary[i].push(summary)
-							externalCalendarEventsStart[i].push(start)
-							externalCalendarEventsEnd[i].push(end)
-							console.log(
-								`\t\t${start} - ${end} | ${event.summary}`
-							)
-						})
-						// console.log(`\tChecking the arrays`)
-						// for (
-						// 	let j = 0;
-						// 	j < externalCalendarEventsId[i].length;
-						// 	j++
-						// ) {
-						// 	console.log(
-						// 		`\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}\n\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\n\t\texternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\n\t\texternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\n`
-						// 	)
-						// }
-					} else {
-						console.log("No upcoming events found.")
-					}
+				} else {
+					console.log(`No events Found`)
 				}
-			)
+			}
 		}
+		console.log(
+			`\t\texternalCalendarEventsId[0].length : ${externalCalendarEventsId[0].length}`
+		)
 		await setTimeout(
 			() => console.log(`After Listing External calendar events...`),
 			1000
@@ -183,9 +187,9 @@ const doImportEvents = async (auth) => {
 				`\t\texternalCalendarEventsId[${i}].length : ${externalCalendarEventsId[i].length}`
 			)
 			for (let j = 0; j < externalCalendarEventsId[i].length; j++) {
-				// console.log(
-				// 	`externalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\nexternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\nexternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\nexternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}`
-				// )
+				console.log(
+					`\t\texternalCalendarEventsSummary[${i}][${j}] : ${externalCalendarEventsSummary[i][j]}\n\t\texternalCalendarEventsStart[${i}][${j}] : ${externalCalendarEventsStart[i][j]}\n\t\texternalCalendarEventsEnd[${i}][${j}] : ${externalCalendarEventsEnd[i][j]}\n\t\texternalCalendarEventsId[${i}][${j}] : ${externalCalendarEventsId[i][j]}`
+				)
 				const calendarEventImportResponse = await calendar.events.import(
 					{
 						calendarId: externalCalendarsId[i],
