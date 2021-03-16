@@ -253,22 +253,6 @@ const doCopyCalendars = async (auth) => {
 		 * Move the new events to the copy calendar
 		 *********************************************/
 		let copyCalendarId
-		for (let i = 0; i < externalCalendarsId.length; i++) {
-			console.log(`externalCalendarsId[i] : ${externalCalendarsId[i]}`)
-			console.log(`copyCalendarsId[i] : ${copyCalendarsId[i]}`)
-			for (let k = 0; k < copyCalendarsId.length; k++) {
-				const isTheCopy = copyCalendarsSummary[k].includes(
-					externalCalendarsSummary[i]
-				)
-				if (isTheCopy) {
-					copyCalendarId = copyCalendarsId[k]
-					console.log(
-						`${copyCalendarsSummary[k]} includes ${externalCalendarsSummary[i]}\ncopyCalendarId:${copyCalendarId}`
-					)
-				}
-			}
-		}
-
 		for (let i = 0; i < externalCalendarsCounter; i++) {
 			for (let k = 0; k < copyCalendarsId.length; k++) {
 				const isTheCopy = copyCalendarsSummary[k].includes(
@@ -279,9 +263,10 @@ const doCopyCalendars = async (auth) => {
 					console.log(
 						`${copyCalendarsSummary[k]} includes ${externalCalendarsSummary[i]}\ncopyCalendarId:${copyCalendarId}`
 					)
+					break
 				}
 			}
-			for (let j = 0; j < externalCalendarEventsId.length; j++) {
+			for (let j = 0; j < importedEventsId[i].length; j++) {
 				const moveExternalCalendarToCopy = await calendar.events.move({
 					calendarId: `${externalCalendarsId[i]}`,
 					eventId: `${importedEventsId[i][j]}`,
