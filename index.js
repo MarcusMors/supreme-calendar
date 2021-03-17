@@ -7,6 +7,17 @@ let totalCalendars = 0
 let calendarsId = []
 let wasLastEventOutside
 let headingHome
+
+function futureDay(days = 14) {
+	const today = new Date()
+	const futureDay = new Date(
+		today.getFullYear(),
+		today.getMonth(),
+		today.getDate() + days
+	)
+	return futureDay
+}
+
 // If modifying these scopes, delete token.json.
 const SCOPES = [
 	"https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
@@ -92,7 +103,7 @@ let importedEventsId = []
 let copyCalendarsId = []
 let copyCalendarsSummary = []
 
-const doCopyCalendars = async (auth) => {
+const doCopyCalendarEvents = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
 		/*********************************************
@@ -146,6 +157,7 @@ const doCopyCalendars = async (auth) => {
 			const externalCalendarEventsResponse = await calendar.events.list({
 				calendarId: externalCalendarId,
 				timeMin: new Date().toISOString(),
+				timeMax: futureDay(),
 				maxResults: 2,
 				singleEvents: true,
 				orderBy: "startTime",
@@ -284,179 +296,118 @@ const doCopyCalendars = async (auth) => {
 	}
 }
 
-function copyExternalCalendars(auth) {
-	console.log(`Copying external calendars...`)
-	doCopyCalendars(auth)
+const standardizeAndFirstCheck = async (auth) => {
+	try {
+		const calendar = google.calendar({ version: "v3", auth })
+		/*********************************************
+		 * Get Calendar Id's
+		 *********************************************/
+		console.log(`Getting Calendar Id's`)
+		const calendarListResponse = await calendar.calendarList.list({})
+		let itemIndexHolder = []
+
+		console.log(`Data length : ${calendarListResponse.data.items.length}`)
+
+		for (let i = 0; i < calendarListResponse.data.items.length; i++) {
+			const element = calendarListResponse.data.items[i].summary.slice(-1)
+			if (element > -1 && element < 9) {
+				itemIndexHolder[totalCalendars] = i
+				totalCalendars++
+				if (element > lowestPriority) {
+					lowestPriority = element
+				}
+			}
+		}
+		for (let i = 0; i < lowestPriority + 1; i++) {
+			calendarsId[i] = []
+		}
+		console.log(`\ttotalCalendars : ${totalCalendars}`)
+		console.log(`\tlowestPriority : ${lowestPriority}`)
+		for (let i = 0; i < totalCalendars; i++) {
+			const indexHolder = itemIndexHolder[i]
+			for (let j = 0; j < +lowestPriority + 1; j++) {
+				if (
+					+calendarListResponse.data.items[indexHolder].summary.slice(
+						-1
+					) === j
+				) {
+					calendarsId[j].push(
+						calendarListResponse.data.items[indexHolder].id
+					)
+				}
+			}
+		}
+	} catch (error) {
+		console.error(error)
+	}
 }
 
-function listCalendars(auth) {
-	console.log("listCalendars...")
-	const calendar = google.calendar({ version: "v3", auth })
-	calendar.calendarList.list({}).then(
-		function (response) {
-			let itemIndexHolder = []
+const listCalendars = async (auth) => {
+	try {
+		const calendar = google.calendar({ version: "v3", auth })
 
-			console.log(`Data length : ${response.data.items.length}`)
+		console.log(`\n\tcalendarsId :\n`)
 
-			for (let i = 0; i < response.data.items.length; i++) {
-				const element = response.data.items[i].summary.slice(-1)
-				if (element > -1 && element < 9) {
-					itemIndexHolder[totalCalendars] = i
-					totalCalendars++
-					if (element > lowestPriority) {
-						lowestPriority = element
-					}
-				}
+		for (let i = 0; i < +lowestPriority + 1; i++) {
+			console.log(`[${i}]:`)
+			for (let j = 0; j < calendarsId[i].length; j++) {
+				console.log(`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`)
 			}
-			for (let i = 0; i < lowestPriority + 1; i++) {
-				calendarsId[i] = []
-			}
-			console.log(`\ttotalCalendars : ${totalCalendars}`)
-			console.log(`\tlowestPriority : ${lowestPriority}`)
-			for (let i = 0; i < totalCalendars; i++) {
-				const indexHolder = itemIndexHolder[i]
-				for (let j = 0; j < +lowestPriority + 1; j++) {
-					if (
-						+response.data.items[indexHolder].summary.slice(-1) ===
-						j
-					) {
-						calendarsId[j].push(response.data.items[indexHolder].id)
-					}
-				}
-			}
+		}
 
-			console.log(`\n\tcalendarsId :\n`)
-
-			for (let i = 0; i < +lowestPriority + 1; i++) {
-				console.log(`[${i}]:`)
-				for (let j = 0; j < calendarsId[i].length; j++) {
-					console.log(
-						`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`
-					)
-				}
-			}
-
-			console.log(`\nImporting and moving Calendars#9 events...\n`)
-
-			if (+lowestPriority === 9) {
-				for (let i = 0; i < calendarsId[9].length; i++) {
-					const originalCalendarId = calendarsId[9][i]
-					let eventsStart = []
-					let eventsEnd = []
-					let eventsId = []
-					let eventsSummary = []
-					calendar.events.list(
-						{
-							calendarId: calendarsId[9][i],
-							timeMin: new Date().toISOString(),
-							// timeMax: new Date().toISOString(),
-							maxResults: 16,
-							singleEvents: true,
-							orderBy: "startTime",
-						},
-						(err, res) => {
-							if (err)
-								return console.log(
-									"The API returned an error: " + err
-								)
-							const events = res.data.items
-							if (events.length) {
-								console.log("Upcoming 10 events:")
-								events.map((event, i) => {
-									const start =
-										event.start.dateTime || event.start.date
-									const end =
-										event.end.dateTime || event.end.dat
-									const id = event.id
-									const summary = event.summary
-									console.log(
-										`#9\t${start} - ${end} | ${summary}\n${id}`
-									)
-									eventsStart.push(start)
-									eventsEnd.push(end)
-									eventsId.push(id)
-									eventsSummary.push(summary)
-								})
-							} else {
-								console.log("No upcoming events found.")
-							}
-						}
-					)
-				}
-			} else {
-				console.log(`There aren't #9 Calendars to import and move`)
-			}
-			console.log(`Checking all events in all calendars`)
-			for (let i = 0; i < +lowestPriority + 1; i++) {
-				for (let j = 0; j < calendarsId[i].length; j++) {
-					console.log(
-						`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`
-					)
-					calendar.events.list(
-						{
-							calendarId: calendarsId[i][j],
-							timeMin: new Date().toISOString(),
-							maxResults: 10,
-							singleEvents: true,
-							orderBy: "startTime",
-						},
-						(err, res) => {
-							if (err)
-								return console.log(
-									"The API returned an error: " + err
-								)
-							const events = res.data.items
-							if (events.length) {
+		console.log(`Checking all events in all calendars`)
+		for (let i = 0; i < +lowestPriority + 1; i++) {
+			for (let j = 0; j < calendarsId[i].length; j++) {
+				console.log(`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`)
+				calendar.events.list(
+					{
+						calendarId: calendarsId[i][j],
+						timeMin: new Date().toISOString(),
+						timeMax: futureDay(),
+						maxResults: 10,
+						singleEvents: true,
+						orderBy: "startTime",
+					},
+					(err, res) => {
+						if (err)
+							return console.log(
+								"The API returned an error: " + err
+							)
+						const events = res.data.items
+						if (events.length) {
+							console.log(
+								`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
+							)
+							events.map((event, i) => {
+								const start =
+									event.start.dateTime || event.start.date
+								const end = event.end.dateTime || event.end.date
 								console.log(
-									`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
+									`${start} - ${end} | ${event.summary}\n${event.id}`
 								)
-								events.map((event, i) => {
-									const start =
-										event.start.dateTime || event.start.date
-									const end =
-										event.end.dateTime || event.end.date
-									console.log(
-										`${start} - ${end} | ${event.summary}\n${event.id}`
-									)
-								})
-							} else {
-								console.log("No upcoming events found.")
-							}
+							})
+						} else {
+							console.log("No upcoming events found.")
 						}
-					)
-				}
-				console.log(`\t\t<--  No more events in ${i} priority  -->`)
+					}
+				)
 			}
-		},
-		function (err) {
-			console.error("Execute error", err)
+			console.log(`\t\t<--  No more events in ${i} priority  -->`)
 		}
-	)
+	} catch (error) {
+		console.error(error)
+	}
 }
 
-function listEvents(auth) {
-	console.log("listEvents...")
-	const calendar = google.calendar({ version: "v3", auth })
-	calendar.events.list(
-		{
-			calendarId: "primary",
-			timeMin: new Date().toISOString(),
-			maxResults: 10,
-			singleEvents: true,
-			orderBy: "startTime",
-		},
-		(err, res) => {
-			if (err) return console.log("The API returned an error: " + err)
-			const events = res.data.items
-			if (events.length) {
-				console.log("Upcoming 10 events:")
-				events.map((event, i) => {
-					const start = event.start.dateTime || event.start.date
-					console.log(`${start} - ${event.summary}`)
-				})
-			} else {
-				console.log("No upcoming events found.")
-			}
-		}
-	)
+async function copyExternalCalendars(auth) {
+	try {
+		// console.log(`Copying external calendars...`)
+		// await doCopyCalendarEvents(auth)
+		console.log(`standardizing the descriptions and first check...`)
+		await standardizeAndFirstCheck(auth)
+		console.log(`descriptions...`)
+		await listCalendars(auth)
+	} catch (error) {
+		console.error(error)
+	}
 }

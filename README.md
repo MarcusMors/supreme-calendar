@@ -45,8 +45,7 @@ task : you can do it in a period of time
 
 -   Sleeping time
     -   condition: must be at home
--   Take a bath
-    -   condition: must be at home
+
 -   Meals
 
     -   Breakfast
@@ -60,7 +59,15 @@ task : you can do it in a period of time
     -   mealBefore : x time
     -   compatibleWith : [array of events],[array of activities]
 
-##### 2. Commuting time and backup time (time to go somewhere or return home)
+-	Personal Care
+    -   condition: must be at home
+	-	wash my teeth
+	-	wash my hair
+	-	take a bath
+
+	Description
+	-	compatibleWith : [array of events],[array of activities]
+##### 2. Commuting time and backup time (tisme to go somewhere or return home)
 
 Description
 
