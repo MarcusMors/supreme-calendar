@@ -1,96 +1,16 @@
-const fs = require("fs")
-const readline = require("readline")
 const { google } = require("googleapis")
+const fs = require("fs")
 const { request } = require("http")
-let lowestPriority = -1
-let totalCalendars = 0
-let calendarsId = []
-let wasLastEventOutside
-let headingHome
-
-function futureDay(days = 14) {
-	const today = new Date()
-	const futureDay = new Date(
-		today.getFullYear(),
-		today.getMonth(),
-		today.getDate() + days
-	)
-	return futureDay
-}
-
-// If modifying these scopes, delete token.json.
-const SCOPES = [
-	"https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events",
-]
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
-const TOKEN_PATH = "token.json"
+const { Calendar, Event } = require("./calendar.js")
+const { futureDay } = require("./functions.js")
+const { authorize } = require("./gapiFunctions.js")
 
 // Load client secrets from a local file.
 fs.readFile("credentials.json", (err, content) => {
 	if (err) return console.log("Error loading client secret file:", err)
 	// Authorize a client with credentials, then call the Google Calendar API.
 	authorize(JSON.parse(content), copyExternalCalendars)
-	// authorize(JSON.parse(content), listCalendars)
-	// authorize(JSON.parse(content), listEvents)
 })
-/**
- * given callback function
- *               function(err) { console.error("Execute error", err); )
- * @param {Object} credentials The authorization client credentials.
- * @param {function} callback The callback to call with the authorized client.
- */
-function authorize(credentials, callback) {
-	const { client_secret, client_id, redirect_uris } = credentials.installed
-	const oAuth2Client = new google.auth.OAuth2(
-		client_id,
-		client_secret,
-		redirect_uris[0]
-	)
-
-	// Check if we have previously stored a token.
-	fs.readFile(TOKEN_PATH, (err, token) => {
-		if (err) return getAccessToken(oAuth2Client, callback)
-		oAuth2Client.setCredentials(JSON.parse(token))
-		callback(oAuth2Client)
-	})
-}
-
-/**
- * Get and store new token after prompting for user authorization, and then
- * execute the given callback with the authorized OAuth2 client.
- * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback for the authorized client.
- */
-function getAccessToken(oAuth2Client, callback) {
-	const authUrl = oAuth2Client.generateAuthUrl({
-		access_type: "offline",
-		scope: SCOPES,
-	})
-	console.log("Authorize this app by visiting this url:", authUrl)
-	const rl = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout,
-	})
-	rl.question("Enter the code from that page here: ", (code) => {
-		rl.close()
-		oAuth2Client.getToken(code, (err, token) => {
-			if (err) return console.error("Error retrieving access token", err)
-			oAuth2Client.setCredentials(token)
-			// Store the token to disk for later program executions
-			fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-				if (err) return console.error(err)
-				console.log("Token stored to", TOKEN_PATH)
-			})
-			callback(oAuth2Client)
-		})
-	})
-}
-/**
- * Lists the next 10 events on the user's primary calendar.
- * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- */
 
 let externalCalendarsId = []
 let externalCalendarsSummary = []
@@ -296,6 +216,17 @@ const doCopyCalendarEvents = async (auth) => {
 	}
 }
 
+let calendars = []
+
+let lowestPriority = -1
+let totalCalendars = 0
+let calendarsId = []
+let eventSummaries = []
+let eventDescription = []
+
+let wasLastEventOutside
+let headingHome
+
 const standardizeAndFirstCheck = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
@@ -319,23 +250,66 @@ const standardizeAndFirstCheck = async (auth) => {
 			}
 		}
 		for (let i = 0; i < lowestPriority + 1; i++) {
-			calendarsId[i] = []
+			calendars[i] = []
 		}
 		console.log(`\ttotalCalendars : ${totalCalendars}`)
 		console.log(`\tlowestPriority : ${lowestPriority}`)
 		for (let i = 0; i < totalCalendars; i++) {
 			const indexHolder = itemIndexHolder[i]
-			for (let j = 0; j < +lowestPriority + 1; j++) {
-				if (
-					+calendarListResponse.data.items[indexHolder].summary.slice(
-						-1
-					) === j
-				) {
-					calendarsId[j].push(
-						calendarListResponse.data.items[indexHolder].id
+			const calendarItem = calendarListResponse.data.items[indexHolder]
+			for (let j = 0; j <= +lowestPriority; j++) {
+				if (+calendarItem.summary.slice(-1) === j) {
+					calendars[j].push(
+						new Calendar(calendarItem.summary, calendarItem.id)
 					)
 				}
 			}
+		}
+		console.log(`calendars:`)
+		for (let i = 0; i <= +lowestPriority; i++) {
+			for (let j = 0; j < calendars[i].length; j++) {
+				console.log(
+					`calendars[${i}][${j}] : ${calendars[i][j].summary}`
+				)
+			}
+		}
+
+		console.log(`\nChecking all events in all calendars\n`)
+		for (let i = 0; i < +lowestPriority + 1; i++) {
+			for (let j = 0; j < calendars[i].length; j++) {
+				console.log(
+					`calendars[${i}][${j}] : ${calendars[i][j].summary}`
+				)
+				const listEvents = await calendar.events.list({
+					calendarId: calendars[i][j].id,
+					timeMin: new Date().toISOString(),
+					timeMax: futureDay(),
+					maxResults: 10,
+					singleEvents: true,
+					orderBy: "startTime",
+				})
+				if (listEvents) {
+					const events = listEvents.data.items
+					if (events.length) {
+						console.log(
+							`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
+						)
+						events.map((event, k) => {
+							const start =
+								event.start.dateTime || event.start.date
+							const end = event.end.dateTime || event.end.date
+							console.log(
+								`${start} - ${end} | ${event.summary}\n${event.id}`
+							)
+						})
+					} else {
+						console.log("No upcoming events found.")
+					}
+				} else {
+					console.log(`An error happened`)
+				}
+			}
+			console.log(`\t\t<--  No more events in ${i} priority  -->`)
 		}
 	} catch (error) {
 		console.error(error)
@@ -346,54 +320,7 @@ const listCalendars = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
 
-		console.log(`\n\tcalendarsId :\n`)
-
-		for (let i = 0; i < +lowestPriority + 1; i++) {
-			console.log(`[${i}]:`)
-			for (let j = 0; j < calendarsId[i].length; j++) {
-				console.log(`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`)
-			}
-		}
-
-		console.log(`Checking all events in all calendars`)
-		for (let i = 0; i < +lowestPriority + 1; i++) {
-			for (let j = 0; j < calendarsId[i].length; j++) {
-				console.log(`calendarsId[${i}][${j}] : ${calendarsId[i][j]}`)
-				calendar.events.list(
-					{
-						calendarId: calendarsId[i][j],
-						timeMin: new Date().toISOString(),
-						timeMax: futureDay(),
-						maxResults: 10,
-						singleEvents: true,
-						orderBy: "startTime",
-					},
-					(err, res) => {
-						if (err)
-							return console.log(
-								"The API returned an error: " + err
-							)
-						const events = res.data.items
-						if (events.length) {
-							console.log(
-								`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
-							)
-							events.map((event, i) => {
-								const start =
-									event.start.dateTime || event.start.date
-								const end = event.end.dateTime || event.end.date
-								console.log(
-									`${start} - ${end} | ${event.summary}\n${event.id}`
-								)
-							})
-						} else {
-							console.log("No upcoming events found.")
-						}
-					}
-				)
-			}
-			console.log(`\t\t<--  No more events in ${i} priority  -->`)
-		}
+		console.log(`\n\tcalendars :\n`)
 	} catch (error) {
 		console.error(error)
 	}
