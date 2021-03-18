@@ -73,11 +73,10 @@ const standardizeAndFirstCheck = async (auth) => {
 		console.log(`\nChecking all events in all calendars\n`)
 		for (let i = 0; i < +lowestPriority + 1; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
-				console.log(
-					`calendars[${i}][${j}] : ${calendars[i][j].summary}`
-				)
+				const cal = calendars[i][j]
+				console.log(`calendars[${i}][${j}] : ${cal.summary}`)
 				const listEvents = await calendar.events.list({
-					calendarId: calendars[i][j].id,
+					calendarId: cal.id,
 					timeMin: new Date().toISOString(),
 					timeMax: futureDay(),
 					maxResults: 10,
@@ -86,11 +85,13 @@ const standardizeAndFirstCheck = async (auth) => {
 				})
 				if (listEvents) {
 					const events = listEvents.data.items
-					if (events.length) {
+					if (events) {
 						console.log(
 							`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
 						)
-						events.map((event, k) => {
+						const eventsLength = cal.getEventsLength()
+						for (let k = 0; k < events.length; k++) {
+							const event = events[k]
 							const start =
 								event.start.dateTime || event.start.date
 							if (start.length > 10) {
@@ -98,8 +99,8 @@ const standardizeAndFirstCheck = async (auth) => {
 								const id = event.id
 								const summary = event.summary
 								const description = event.description
-								if (calendar[i][j].events.length() === 0) {
-									calendar[i][j].addNewEvent(
+								if (cal.getEventsLength() === 0) {
+									cal.addNewEvent(
 										summary,
 										description,
 										id,
@@ -108,7 +109,7 @@ const standardizeAndFirstCheck = async (auth) => {
 									)
 								} else {
 									const eventIndex = arrayIncludes(
-										calendars[i][j].events,
+										cal.events,
 										summary
 									)
 									if (eventIndex !== -1) {
@@ -136,7 +137,7 @@ const standardizeAndFirstCheck = async (auth) => {
 								}
 								console.log(`${start} - ${end} | ${summary}`)
 							}
-						})
+						}
 					} else {
 						console.log("No upcoming events found.")
 					}
@@ -150,11 +151,12 @@ const standardizeAndFirstCheck = async (auth) => {
 		for (let i = 0; i < calendars.length; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
-				for (let k = 0; k < cal.events.length; k++) {
+				const eventsLength = cal.getEventsLength()
+				for (let k = 0; k < eventsLength; k++) {
 					const event = cal.events[k]
 					console.log(`summary\t : ${event.summary}`)
 					console.log(`description\t : ${event.description}`)
-					for (let l = 0; l < event.length(); l++) {
+					for (let l = 0; l < event.length; l++) {
 						const id = event.id[l]
 						const start = event.start[l]
 						const end = event.end[l]
