@@ -7,4 +7,14 @@ function futureDay(days = 14) {
 	)
 	return futureDay
 }
-module.exports = { futureDay }
+
+function arrayIncludes(arr, wanted) {
+	for (i = 0; i < arr.length; i++) {
+		if (arr[i] === wanted) {
+			return i
+		}
+	}
+	return -1
+}
+
+module.exports = { futureDay, arrayIncludes }

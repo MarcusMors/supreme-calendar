@@ -84,7 +84,7 @@ const doCopyCalendarEvents = async (auth) => {
 						const id = event.id
 						const summary = event.summary
 						console.log(`\t\t${start} - ${end} | ${event.summary}`)
-						if (start.length != 10) {
+						if (start.length > 10) {
 							/**	//TODO:
 							 * Filter the events that long more than a day and start or ends in a specific hour
 							 */

@@ -2,7 +2,7 @@ const { google } = require("googleapis")
 const fs = require("fs")
 const { request } = require("http")
 const { Calendar, Event } = require("./calendar.js")
-const { futureDay } = require("./functions.js")
+const { futureDay, arrayIncludes } = require("./functions.js")
 const { authorize } = require("./gapiFunctions.js")
 const { doCopyCalendarEvents } = require("./copyCalendarEvents.js")
 
@@ -17,7 +17,6 @@ let calendars = []
 
 let lowestPriority = -1
 let totalCalendars = 0
-let calendarsId = []
 let eventSummaries = []
 let eventDescription = []
 
@@ -94,10 +93,49 @@ const standardizeAndFirstCheck = async (auth) => {
 						events.map((event, k) => {
 							const start =
 								event.start.dateTime || event.start.date
-							const end = event.end.dateTime || event.end.date
-							console.log(
-								`${start} - ${end} | ${event.summary}\n${event.id}`
-							)
+							if (start.length > 10) {
+								const end = event.end.dateTime || event.end.date
+								const id = event.id
+								const summary = event.summary
+								const description = event.description
+								if (calendar[i][j].events.length() === 0) {
+									calendar[i][j].addNewEvent(
+										summary,
+										description,
+										id,
+										start,
+										end
+									)
+								} else {
+									const eventIndex = arrayIncludes(
+										calendars[i][j].events,
+										summary
+									)
+									if (eventIndex !== -1) {
+										calendar[i][j].addNewEvent(
+											summary,
+											description,
+											id,
+											start,
+											end
+										)
+									} else {
+										calendar[i][j].events[
+											eventIndex
+										].addData(id, start, end)
+										if (
+											calendar[i][j].events[eventIndex]
+												.description === false &&
+											description
+										) {
+											calendar[i][j].events[
+												eventIndex
+											].addDescription(description)
+										}
+									}
+								}
+								console.log(`${start} - ${end} | ${summary}`)
+							}
 						})
 					} else {
 						console.log("No upcoming events found.")
@@ -107,6 +145,23 @@ const standardizeAndFirstCheck = async (auth) => {
 				}
 			}
 			console.log(`\t\t<--  No more events in ${i} priority  -->`)
+		}
+		console.log(`Checking calendars and its events`)
+		for (let i = 0; i < calendars.length; i++) {
+			for (let j = 0; j < calendars[i].length; j++) {
+				const cal = calendars[i][j]
+				for (let k = 0; k < cal.events.length; k++) {
+					const event = cal.events[k]
+					console.log(`summary\t : ${event.summary}`)
+					console.log(`description\t : ${event.description}`)
+					for (let l = 0; l < event.length(); l++) {
+						const id = event.id[l]
+						const start = event.start[l]
+						const end = event.end[l]
+						console.log(`${start} - ${end} \n ${id}`)
+					}
+				}
+			}
 		}
 	} catch (error) {
 		console.error(error)
@@ -125,12 +180,12 @@ const listCalendars = async (auth) => {
 
 async function copyExternalCalendars(auth) {
 	try {
-		console.log(`Copying external calendars...`)
-		await doCopyCalendarEvents(auth)
+		// console.log(`Copying external calendars...`)
+		// await doCopyCalendarEvents(auth)
 		console.log(`standardizing the descriptions and first check...`)
 		await standardizeAndFirstCheck(auth)
-		console.log(`descriptions...`)
-		await listCalendars(auth)
+		// console.log(`descriptions...`)
+		// await listCalendars(auth)
 	} catch (error) {
 		console.error(error)
 	}
