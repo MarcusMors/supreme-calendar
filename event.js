@@ -7,17 +7,18 @@ class Event {
 		this.starts = []
 		this.ends = []
 	}
-	length() {
-		if (this.ids === undefined) {
-			return 0
+	getLength() {
+		if (this.hasData) {
+			return this.ids.length
 		} else {
-			return this.ids.length()
+			return 0
 		}
 	}
 	addData(id, start, end) {
 		this.ids.push(id)
 		this.starts.push(start)
 		this.ends.push(end)
+		this.hasData = true
 	}
 	addDescription(description) {
 		this.description = description

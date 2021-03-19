@@ -45,11 +45,16 @@ const standardizeAndFirstCheck = async (auth) => {
 				}
 			}
 		}
+		// Turning the array into a 2D Array
 		for (let i = 0; i < lowestPriority + 1; i++) {
 			calendars[i] = []
 		}
 		console.log(`\ttotalCalendars : ${totalCalendars}`)
 		console.log(`\tlowestPriority : ${lowestPriority}`)
+
+		/*********************************************
+		 * Creating the Calendar Instances
+		 *********************************************/
 		for (let i = 0; i < totalCalendars; i++) {
 			const indexHolder = itemIndexHolder[i]
 			const calendarItem = calendarListResponse.data.items[indexHolder]
@@ -70,6 +75,9 @@ const standardizeAndFirstCheck = async (auth) => {
 			}
 		}
 
+		/*********************************************
+		 * Creating Event instances in calendar instance
+		 *********************************************/
 		console.log(`\nChecking all events in all calendars\n`)
 		for (let i = 0; i < +lowestPriority + 1; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
@@ -85,11 +93,11 @@ const standardizeAndFirstCheck = async (auth) => {
 				})
 				if (listEventsResponse) {
 					const events = listEventsResponse.data.items
+
 					if (events) {
 						console.log(
 							`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
 						)
-						const eventsLength = cal.getEventsLength()
 						for (let k = 0; k < events.length; k++) {
 							const event = events[k]
 							const start =
@@ -99,7 +107,8 @@ const standardizeAndFirstCheck = async (auth) => {
 								const id = event.id
 								const summary = event.summary
 								const description = event.description
-								if (cal.getEventsLength() === 0) {
+								const eventsLength = cal.getEventsLength()
+								if (eventsLength === 0) {
 									cal.addEvent(
 										summary,
 										description,
@@ -108,8 +117,18 @@ const standardizeAndFirstCheck = async (auth) => {
 										end
 									)
 								} else {
+									let summaries = new Array()
+									// let hasSummaries = false
+									for (let l = 0; l < eventsLength; l++) {
+										// if (hasSummaries) {
+										summaries.push(cal.events[l].summary)
+										// } else {
+										// 	hasSummaries = true
+										// 	summaries[0] = cal.event[l].summary
+										// }
+									}
 									const eventIndex = arrayIncludes(
-										cal.events,
+										summaries,
 										summary
 									)
 									console.log(`eventIndex : ${eventIndex}`)
@@ -156,21 +175,33 @@ const standardizeAndFirstCheck = async (auth) => {
 			}
 			console.log(`\t\t<--  No more events in ${i} priority  -->`)
 		}
-		console.log(`Checking calendars and its events`)
+
+		console.log(`\n\nChecking calendars and its events\n`)
 		for (let i = 0; i < calendars.length; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
 				const eventsLength = cal.getEventsLength()
+				console.log(`calendar summary : ${cal.summary}`)
+				let flag = false
 				for (let k = 0; k < eventsLength; k++) {
+					flag = true
 					const event = cal.events[k]
-					console.log(`summary\t : ${event.summary}`)
-					console.log(`description\t : ${event.description}`)
+					console.log(`\tsummary\t\t : ${event.summary}`)
+					if (event.description) {
+						console.log(`\tdescription\t :\n\t${event.description}`)
+					} else {
+						console.log(`\tdescription\t : no-description`)
+					}
+					console.log(`\tdataLength\t :\t${event.getLength()}`)
 					for (let l = 0; l < event.length; l++) {
 						const id = event.id[l]
 						const start = event.start[l]
 						const end = event.end[l]
 						console.log(`${start} - ${end} \n ${id}`)
 					}
+				}
+				if (flag == false) {
+					console.log(`\tNo events have been found`)
 				}
 			}
 		}
