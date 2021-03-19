@@ -87,7 +87,7 @@ const standardizeAndFirstCheck = async (auth) => {
 					calendarId: cal.id,
 					timeMin: new Date().toISOString(),
 					timeMax: futureDay(),
-					maxResults: 10,
+					// maxResults: 10,
 					singleEvents: true,
 					orderBy: "startTime",
 				})
@@ -176,12 +176,13 @@ const standardizeAndFirstCheck = async (auth) => {
 			console.log(`\t\t<--  No more events in ${i} priority  -->`)
 		}
 
+		//making sure the data structure is filled
 		console.log(`\n\nChecking calendars and its events\n`)
 		for (let i = 0; i < calendars.length; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
 				const eventsLength = cal.getEventsLength()
-				console.log(`calendar summary : ${cal.summary}`)
+				console.log(`\ncalendar summary : ${cal.summary}`)
 				let flag = false
 				for (let k = 0; k < eventsLength; k++) {
 					flag = true

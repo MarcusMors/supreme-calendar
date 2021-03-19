@@ -67,7 +67,7 @@ const doCopyCalendarEvents = async (auth) => {
 				calendarId: externalCalendarId,
 				timeMin: new Date().toISOString(),
 				timeMax: futureDay(),
-				maxResults: 2,
+				// maxResults: 2,
 				singleEvents: true,
 				orderBy: "startTime",
 			})
