@@ -75,7 +75,7 @@ const standardizeAndFirstCheck = async (auth) => {
 			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
 				console.log(`calendars[${i}][${j}] : ${cal.summary}`)
-				const listEvents = await calendar.events.list({
+				const listEventsResponse = await calendar.events.list({
 					calendarId: cal.id,
 					timeMin: new Date().toISOString(),
 					timeMax: futureDay(),
@@ -83,8 +83,8 @@ const standardizeAndFirstCheck = async (auth) => {
 					singleEvents: true,
 					orderBy: "startTime",
 				})
-				if (listEvents) {
-					const events = listEvents.data.items
+				if (listEventsResponse) {
+					const events = listEventsResponse.data.items
 					if (events) {
 						console.log(
 							`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
@@ -100,7 +100,7 @@ const standardizeAndFirstCheck = async (auth) => {
 								const summary = event.summary
 								const description = event.description
 								if (cal.getEventsLength() === 0) {
-									cal.addNewEvent(
+									cal.addEvent(
 										summary,
 										description,
 										id,
@@ -112,8 +112,12 @@ const standardizeAndFirstCheck = async (auth) => {
 										cal.events,
 										summary
 									)
-									if (eventIndex !== -1) {
-										calendar[i][j].addNewEvent(
+									console.log(`eventIndex : ${eventIndex}`)
+									if (+eventIndex === -1) {
+										console.log(
+											`inside if eventIndex : ${eventIndex}`
+										)
+										cal.addEvent(
 											summary,
 											description,
 											id,
@@ -121,11 +125,16 @@ const standardizeAndFirstCheck = async (auth) => {
 											end
 										)
 									} else {
-										calendar[i][j].events[
-											eventIndex
-										].addData(id, start, end)
+										console.log(
+											`else eventIndex : ${eventIndex}`
+										)
+										cal.events[eventIndex].addData(
+											id,
+											start,
+											end
+										)
 										if (
-											calendar[i][j].events[eventIndex]
+											cal.events[eventIndex]
 												.description === false &&
 											description
 										) {

@@ -1,18 +1,11 @@
 class Event {
-	constructor(
-		summary,
-		description = false,
-		ids = false,
-		starts = false,
-		ends = false
-	) {
+	constructor(summary, description = "") {
 		this.summary = summary
-		description
-			? (this.description = description)
-			: (this.description = false)
-		ids ? (this.ids = ids) : (this.ids = [])
-		starts ? (this.starts = starts) : (this.starts = [])
-		ends ? (this.ends = ends) : (this.ends = [])
+		this.description = description
+		this.hasData = false
+		this.ids = []
+		this.starts = []
+		this.ends = []
 	}
 	length() {
 		if (this.ids === undefined) {

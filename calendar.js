@@ -5,28 +5,25 @@ class Calendar {
 		this.summary = summary
 		this.id = id
 		this.hasEvents = false
-		// this.events = events ? events : []
+		this.events = []
+		this.eventsLength = 0
 	}
-	addEvent(summary, description, ids = false, starts = false, ends = false) {
-		this.events.push(new Event(summary, description, ids, starts, ends))
-	}
-	addNewEvent(summary, description, id, start, end) {
-		if (this.hasEvents) {
-			this.events.push(new Event(summary, description))
-			this.events[this.events.length].addData(id, start, end)
-		} else {
-			this.hasEvents = true
-			this.events = []
-			this.events[0] = new Event(summary, description)
-			this.events[0].addData(id, start, end)
-		}
+	addEvent(summary, description, id, start, end) {
+		this.events.push(new Event(summary, description))
+		this.events[this.events.length - 1].addData(id, start, end)
+		console.log(`An event has been added`)
+		this.eventsLength++
+		// this.hasEvents = true
 	}
 	getEventsLength() {
-		if (this.hasEvents) {
-			return events.length
-		} else {
-			return 0
-		}
+		// if (this.hasEvents) {
+		// 	console.log(`getEventsLength\nthis.hasEvents : ${this.hasEvents}`)
+		// 	console.log(`this.summary : ${this.summary}`)
+		// 	return this.events.length
+		// } else {
+		// 	return 0
+		// }
+		return this.eventsLength
 	}
 }
 
