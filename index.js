@@ -183,9 +183,9 @@ const standardizeAndFirstCheck = async (auth) => {
 				const cal = calendars[i][j]
 				const eventsLength = cal.getEventsLength()
 				console.log(`\ncalendar summary : ${cal.summary}`)
-				let flag = false
+				let hasDescription = false
 				for (let k = 0; k < eventsLength; k++) {
-					flag = true
+					hasDescription = true
 					const event = cal.events[k]
 					console.log(`\tsummary\t\t : ${event.summary}`)
 					if (event.description) {
@@ -201,11 +201,35 @@ const standardizeAndFirstCheck = async (auth) => {
 						console.log(`${start} - ${end} \n ${id}`)
 					}
 				}
-				if (flag == false) {
+				if (hasDescription == false) {
 					console.log(`\tNo events have been found`)
 				}
 			}
 		}
+		/*********************************************
+		 * Standardize the event descriptions
+		 *********************************************/
+		// console.log(`\n\nStandardize the event descriptions\n`)
+		// for (let i = 0; i < calendars.length; i++) {
+		// 	for (let j = 0; j < calendars[i].length; j++) {
+		// 		const cal = calendars[i][j]
+		// 		const eventsLength = cal.getEventsLength()
+		// 		let hasDescription = false
+		// 		for (let k = 0; k < eventsLength; k++) {
+		// 			hasDescription = true
+		// 			const event = cal.events[k]
+		// 			for (let l = 0; l < event.length; l++) {
+		// 				const id = event.id[l]
+		// 				const start = event.start[l]
+		// 				const end = event.end[l]
+		// 				console.log(`${start} - ${end} \n ${id}`)
+		// 			}
+		// 		}
+		// 		if (hasDescription == false) {
+		// 			console.log(`\tNo events have been found`)
+		// 		}
+		// 	}
+		// }
 	} catch (error) {
 		console.error(error)
 	}
@@ -225,6 +249,7 @@ async function copyExternalCalendars(auth) {
 	try {
 		// console.log(`Copying external calendars...`)
 		// await doCopyCalendarEvents(auth)
+		// what to do if an event of the original calendar changes, is deleted, or a new one is added?
 		console.log(`standardizing the descriptions and first check...`)
 		await standardizeAndFirstCheck(auth)
 		// console.log(`descriptions...`)

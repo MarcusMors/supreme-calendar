@@ -44,6 +44,7 @@ task : you can do it in a period of time
 3 types of event:
 
 -   Sleeping time
+
     -   condition: must be at home
 
 -   Meals
@@ -59,14 +60,19 @@ task : you can do it in a period of time
     -   mealBefore : x time
     -   compatibleWith : [array of events],[array of activities]
 
--	Personal Care
-    -   condition: must be at home
-	-	wash my teeth
-	-	wash my hair
-	-	take a bath
+-   Personal Care
 
-	Description
-	-	compatibleWith : [array of events],[array of activities]
+    -   condition: must be at home
+    -   wash my teeth
+    -   wash my hair
+    -   take a bath
+
+    Description
+
+    -   doBefore : specific time
+    -   doAfter : specific time
+    -   compatibleWith : [array of events],[array of activities]
+
 ##### 2. Commuting time and backup time (tisme to go somewhere or return home)
 
 Description
@@ -131,7 +137,7 @@ Longs: depending on the remaining time and the minimum time for my Hobbies and L
 Activities
 
 -   Studying what I already know and homework (> 120 min)
--   Research more the university topics (90 min minimum)
+-   Research more the university topics (>90 min)
 -   E-learning(90 - 180 min, interruptible)
 -   Learn and practice another language (long time, needs preparation and not interruptible)
 -   Learn and code (1h at least, Interruptible if it's longer than that)
