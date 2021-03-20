@@ -7,6 +7,8 @@ class Calendar {
 		this.hasEvents = false
 		this.events = []
 		this.eventsLength = 0
+		this.hasExceptions = false
+		this.exceptionDays = []
 	}
 	addEvent(summary, description, id, start, end) {
 		this.events.push(new Event(summary, description))

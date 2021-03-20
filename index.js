@@ -164,6 +164,7 @@ const standardizeAndFirstCheck = async (auth) => {
 									}
 								}
 								console.log(`${start} - ${end} | ${summary}`)
+								console.log(`${description}`)
 							}
 						}
 					} else {
@@ -189,7 +190,11 @@ const standardizeAndFirstCheck = async (auth) => {
 					const event = cal.events[k]
 					console.log(`\tsummary\t\t : ${event.summary}`)
 					if (event.description) {
-						console.log(`\tdescription\t :\n\t${event.description}`)
+						// for (let l = 0; l < event.description.length; l++) {
+						// 	const element = event.description[l]
+						// 	console.log(`\t\t${element}`)
+						// }
+						console.log(event.description) // object.length = undefined
 					} else {
 						console.log(`\tdescription\t : no-description`)
 					}
@@ -209,7 +214,9 @@ const standardizeAndFirstCheck = async (auth) => {
 		/*********************************************
 		 * Standardize the event descriptions
 		 *********************************************/
+
 		// console.log(`\n\nStandardize the event descriptions\n`)
+
 		// for (let i = 0; i < calendars.length; i++) {
 		// 	for (let j = 0; j < calendars[i].length; j++) {
 		// 		const cal = calendars[i][j]
@@ -224,9 +231,6 @@ const standardizeAndFirstCheck = async (auth) => {
 		// 				const end = event.end[l]
 		// 				console.log(`${start} - ${end} \n ${id}`)
 		// 			}
-		// 		}
-		// 		if (hasDescription == false) {
-		// 			console.log(`\tNo events have been found`)
 		// 		}
 		// 	}
 		// }

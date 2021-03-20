@@ -173,3 +173,33 @@ Activities:
 -   Document my projects
 -   Social Media Production
 -   Watch news
+
+# Loop A
+
+1. Pull each day events the next 2 weeks events, every x time.
+2. Update the data of each day with each request
+
+# Loop B
+
+1. Pull the next 2 weeks events in one request, every x time.
+2. Separate the events by day and update the data
+
+# Justification
+
+1. the user must be able to create, delete an event or change its start or end.
+2. a
+
+Find the overlapping event
+Is there an end after my start & before my end?
+Is there an start after my start & before my end?
+Have a lower priority?
+
+-   Move it
+
+Have a higher priority?
+
+-   Move myself
+
+Have the same priority?
+
+-   Do nothing
