@@ -202,16 +202,18 @@ const standardizeAndFirstCheck = async (auth) => {
 				let hasDescription = false
 				for (let k = 0; k < eventsLength; k++) {
 					const event = cal.events[k]
+					const noDescription = event.getNoLength()
 					Object.entries(event.description).length === 0
 						? (hasDescription = false)
 						: (hasDescription = true)
 					console.log(`\tsummary\t\t : ${event.summary}`)
 					if (hasDescription) {
+						console.log(`\t\tnoDescription\t: ${noDescription}`)
+						console.log(event.description) // object.length = undefined
 						// for (let l = 0; l < event.description.length; l++) {
 						// 	const element = event.description[l]
 						// 	console.log(`\t\t${element}`)
 						// }
-						console.log(event.description) // object.length = undefined
 					} else {
 						console.log(`\tdescription\t : no-description`)
 					}
