@@ -7,6 +7,7 @@ class Event {
 		this.ends = []
 		this.educational = false
 		this.description = {}
+		this.noDescription = []
 		if (description) {
 			description = description.replace(/<\/span>/g, "")
 			description = description.replace(/<span>/g, "")
@@ -33,14 +34,34 @@ class Event {
 			return 0
 		}
 	}
-	addData(id, start, end) {
+	addData(id, start, end, description) {
 		this.ids.push(id)
 		this.starts.push(start)
 		this.ends.push(end)
 		this.hasData = true
+		if (description) {
+			if (!this.description) {
+				this.addDescription(description)
+			}
+		} else {
+			this.addNoDescription(this.ids.length)
+		}
 	}
 	addDescription(description) {
 		this.description = description
+	}
+	addNoDescription(index) {
+		this.noDescription.push(index)
+	}
+	getNoLength() {
+		if (this.noDescription) {
+			return this.noDescription.length
+		} else {
+			return 0
+		}
+	}
+	deleteNoDescription() {
+		this.noDescription = []
 	}
 }
 

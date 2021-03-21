@@ -12,10 +12,12 @@ class Calendar {
 	}
 	addEvent(summary, description, id, start, end) {
 		this.events.push(new Event(summary, description))
-		this.events[this.events.length - 1].addData(id, start, end)
+		this.events[this.events.length - 1].addData(id, start, end, description)
 		console.log(`An event has been added`)
+		if (!description) {
+			this.events[this.eventsLength].addNoDescription(0)
+		}
 		this.eventsLength++
-		// this.hasEvents = true
 	}
 	getEventsLength() {
 		// if (this.hasEvents) {

@@ -17,11 +17,11 @@ let calendars = []
 
 let lowestPriority = -1
 let totalCalendars = 0
-let eventSummaries = []
-let eventDescription = []
 
 let wasLastEventOutside
 let headingHome
+
+let descriptionCounters = []
 
 const standardizeAndFirstCheck = async (auth) => {
 	try {
@@ -118,30 +118,27 @@ const standardizeAndFirstCheck = async (auth) => {
 									)
 								} else {
 									let summaries = new Array()
-									// let hasSummaries = false
 									for (let l = 0; l < eventsLength; l++) {
-										// if (hasSummaries) {
 										summaries.push(cal.events[l].summary)
-										// } else {
-										// 	hasSummaries = true
-										// 	summaries[0] = cal.event[l].summary
-										// }
 									}
+
 									const eventIndex = arrayIncludes(
 										summaries,
 										summary
 									)
+
 									console.log(`eventIndex : ${eventIndex}`)
+
 									if (+eventIndex === -1) {
 										console.log(
 											`inside if eventIndex : ${eventIndex}`
 										)
 										cal.addEvent(
 											summary,
-											description,
 											id,
 											start,
-											end
+											end,
+											description
 										)
 									} else {
 										console.log(
@@ -150,23 +147,41 @@ const standardizeAndFirstCheck = async (auth) => {
 										cal.events[eventIndex].addData(
 											id,
 											start,
-											end
-										)
-										if (
-											cal.events[eventIndex]
-												.description === false &&
+											end,
 											description
-										) {
-											calendar[i][j].events[
-												eventIndex
-											].addDescription(description)
-										}
+										)
+										// description is now added and checked in addData
+										// if (
+										// 	cal.events[eventIndex]
+										// 		.description === false &&
+										// 	description
+										// ) {
+										// 	calendar[i][j].events[
+										// 		eventIndex
+										// 	].addDescription(description)
+										// }
 									}
 								}
 								console.log(`${start} - ${end} | ${summary}`)
 								console.log(`${description}`)
+								if (k === events.length - 1) {
+									//check all events in this calendar
+									for (
+										let l = 0;
+										l < cal.getEventsLength();
+										l++
+									) {
+										const e = cal.events[l]
+										const eLength = e.getLength()
+										const noDesLength = e.getNoLength()
+										if (eLength === noDesLength) {
+											e.deleteNoDescription()
+										}
+									}
+								}
 							}
 						}
+						descriptionCounters = []
 					} else {
 						console.log("No upcoming events found.")
 					}
@@ -186,10 +201,12 @@ const standardizeAndFirstCheck = async (auth) => {
 				console.log(`\ncalendar summary : ${cal.summary}`)
 				let hasDescription = false
 				for (let k = 0; k < eventsLength; k++) {
-					hasDescription = true
 					const event = cal.events[k]
+					Object.entries(event.description).length === 0
+						? (hasDescription = false)
+						: (hasDescription = true)
 					console.log(`\tsummary\t\t : ${event.summary}`)
-					if (event.description) {
+					if (hasDescription) {
 						// for (let l = 0; l < event.description.length; l++) {
 						// 	const element = event.description[l]
 						// 	console.log(`\t\t${element}`)
@@ -206,11 +223,12 @@ const standardizeAndFirstCheck = async (auth) => {
 						console.log(`${start} - ${end} \n ${id}`)
 					}
 				}
-				if (hasDescription == false) {
+				if (!hasDescription) {
 					console.log(`\tNo events have been found`)
 				}
 			}
 		}
+
 		/*********************************************
 		 * Standardize the event descriptions
 		 *********************************************/
