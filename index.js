@@ -135,10 +135,10 @@ const standardizeAndFirstCheck = async (auth) => {
 										)
 										cal.addEvent(
 											summary,
+											description,
 											id,
 											start,
-											end,
-											description
+											end
 										)
 									} else {
 										console.log(
@@ -163,22 +163,6 @@ const standardizeAndFirstCheck = async (auth) => {
 									}
 								}
 								console.log(`${start} - ${end} | ${summary}`)
-								console.log(`${description}`)
-								if (k === events.length - 1) {
-									//check all events in this calendar
-									for (
-										let l = 0;
-										l < cal.getEventsLength();
-										l++
-									) {
-										const e = cal.events[l]
-										const eLength = e.getLength()
-										const noDesLength = e.getNoLength()
-										if (eLength === noDesLength) {
-											e.deleteNoDescription()
-										}
-									}
-								}
 							}
 						}
 						descriptionCounters = []
@@ -199,23 +183,33 @@ const standardizeAndFirstCheck = async (auth) => {
 				const cal = calendars[i][j]
 				const eventsLength = cal.getEventsLength()
 				console.log(`\ncalendar summary : ${cal.summary}`)
-				let hasDescription = false
+				let hasDescriptions = false
 				for (let k = 0; k < eventsLength; k++) {
 					const event = cal.events[k]
-					const noDescription = event.getNoLength()
-					Object.entries(event.description).length === 0
-						? (hasDescription = false)
-						: (hasDescription = true)
+					const descriptions = event.descriptions
+					event.descriptions
+						? (hasDescriptions = true)
+						: (hasDescriptions = false)
 					console.log(`\tsummary\t\t : ${event.summary}`)
-					if (hasDescription) {
-						console.log(`\t\tnoDescription\t: ${noDescription}`)
-						console.log(event.description) // object.length = undefined
+					if (hasDescriptions) {
+						for (let l = 0; l < descriptions.length; l++) {
+							let hasDescription
+							Object.entries(descriptions).length === 0
+								? (hasDescription = false)
+								: (hasDescription = true)
+							if (hasDescription) {
+								const description = descriptions[l]
+								console.log(description)
+							} else {
+								console.log(`\t\tNo description`)
+							}
+						}
 						// for (let l = 0; l < event.description.length; l++) {
 						// 	const element = event.description[l]
 						// 	console.log(`\t\t${element}`)
 						// }
 					} else {
-						console.log(`\tdescription\t : no-description`)
+						console.log(`\tdescription\t : no-descriptions`)
 					}
 					console.log(`\tdataLength\t :\t${event.getLength()}`)
 					for (let l = 0; l < event.length; l++) {
@@ -225,7 +219,7 @@ const standardizeAndFirstCheck = async (auth) => {
 						console.log(`${start} - ${end} \n ${id}`)
 					}
 				}
-				if (!hasDescription) {
+				if (!hasDescriptions) {
 					console.log(`\tNo events have been found`)
 				}
 			}
@@ -262,7 +256,6 @@ const standardizeAndFirstCheck = async (auth) => {
 const listCalendars = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
-
 		console.log(`\n\tcalendars :\n`)
 	} catch (error) {
 		console.error(error)
