@@ -187,18 +187,26 @@ const standardizeAndFirstCheck = async (auth) => {
 				for (let k = 0; k < eventsLength; k++) {
 					const event = cal.events[k]
 					const descriptions = event.descriptions
-					event.descriptions
+					let atLeastOneDescription = false
+					for (let l = 0; l < descriptions.length; l++) {
+						const description = descriptions[l]
+						if (Object.entries(description).length > 0) {
+							atLeastOneDescription = true
+						}
+					}
+					descriptions
 						? (hasDescriptions = true)
 						: (hasDescriptions = false)
 					console.log(`\tsummary\t\t : ${event.summary}`)
-					if (hasDescriptions) {
+
+					if (atLeastOneDescription) {
 						for (let l = 0; l < descriptions.length; l++) {
+							const description = descriptions[l]
 							let hasDescription
-							Object.entries(descriptions).length === 0
+							Object.entries(description).length === 0
 								? (hasDescription = false)
 								: (hasDescription = true)
 							if (hasDescription) {
-								const description = descriptions[l]
 								console.log(description)
 							} else {
 								console.log(`\t\tNo description`)
