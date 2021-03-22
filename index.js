@@ -150,16 +150,6 @@ const standardizeAndFirstCheck = async (auth) => {
 											end,
 											description
 										)
-										// description is now added and checked in addData
-										// if (
-										// 	cal.events[eventIndex]
-										// 		.description === false &&
-										// 	description
-										// ) {
-										// 	calendar[i][j].events[
-										// 		eventIndex
-										// 	].addDescription(description)
-										// }
 									}
 								}
 								console.log(`${start} - ${end} | ${summary}`)
@@ -181,81 +171,9 @@ const standardizeAndFirstCheck = async (auth) => {
 		for (let i = 0; i < calendars.length; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
-				const eventsLength = cal.getEventsLength()
-				console.log(`\ncalendar summary : ${cal.summary}`)
-				let hasDescriptions = false
-				for (let k = 0; k < eventsLength; k++) {
-					const event = cal.events[k]
-					const descriptions = event.descriptions
-					let atLeastOneDescription = false
-					for (let l = 0; l < descriptions.length; l++) {
-						const description = descriptions[l]
-						if (Object.entries(description).length > 0) {
-							atLeastOneDescription = true
-						}
-					}
-					descriptions
-						? (hasDescriptions = true)
-						: (hasDescriptions = false)
-					console.log(`\tsummary\t\t : ${event.summary}`)
-
-					if (atLeastOneDescription) {
-						for (let l = 0; l < descriptions.length; l++) {
-							const description = descriptions[l]
-							let hasDescription
-							Object.entries(description).length === 0
-								? (hasDescription = false)
-								: (hasDescription = true)
-							if (hasDescription) {
-								console.log(description)
-							} else {
-								console.log(`\t\tNo description`)
-							}
-						}
-						// for (let l = 0; l < event.description.length; l++) {
-						// 	const element = event.description[l]
-						// 	console.log(`\t\t${element}`)
-						// }
-					} else {
-						console.log(`\tdescription\t : no-descriptions`)
-					}
-					console.log(`\tdataLength\t :\t${event.getLength()}`)
-					for (let l = 0; l < event.length; l++) {
-						const id = event.id[l]
-						const start = event.start[l]
-						const end = event.end[l]
-						console.log(`${start} - ${end} \n ${id}`)
-					}
-				}
-				if (!hasDescriptions) {
-					console.log(`\tNo events have been found`)
-				}
+				cal.print()
 			}
 		}
-
-		/*********************************************
-		 * Standardize the event descriptions
-		 *********************************************/
-
-		// console.log(`\n\nStandardize the event descriptions\n`)
-
-		// for (let i = 0; i < calendars.length; i++) {
-		// 	for (let j = 0; j < calendars[i].length; j++) {
-		// 		const cal = calendars[i][j]
-		// 		const eventsLength = cal.getEventsLength()
-		// 		let hasDescription = false
-		// 		for (let k = 0; k < eventsLength; k++) {
-		// 			hasDescription = true
-		// 			const event = cal.events[k]
-		// 			for (let l = 0; l < event.length; l++) {
-		// 				const id = event.id[l]
-		// 				const start = event.start[l]
-		// 				const end = event.end[l]
-		// 				console.log(`${start} - ${end} \n ${id}`)
-		// 			}
-		// 		}
-		// 	}
-		// }
 	} catch (error) {
 		console.error(error)
 	}

@@ -24,6 +24,51 @@ class Calendar {
 		// }
 		return this.eventsLength
 	}
+	print() {
+		const eventsLength = this.getEventsLength()
+		console.log(`\ncalendar summary : ${this.summary}`)
+		let hasDescriptions = false
+		for (let k = 0; k < eventsLength; k++) {
+			const event = this.events[k]
+			const descriptions = event.descriptions
+			let atLeastOneDescription = false
+			for (let l = 0; l < descriptions.length; l++) {
+				const description = descriptions[l]
+				if (Object.entries(description).length > 0) {
+					atLeastOneDescription = true
+				}
+			}
+			descriptions ? (hasDescriptions = true) : (hasDescriptions = false)
+			console.log(`\tsummary\t\t : ${event.summary}`)
+
+			if (atLeastOneDescription) {
+				for (let l = 0; l < descriptions.length; l++) {
+					const description = descriptions[l]
+					let hasDescription
+					Object.entries(description).length === 0
+						? (hasDescription = false)
+						: (hasDescription = true)
+					if (hasDescription) {
+						console.log(description)
+					} else {
+						console.log(`\t\tNo description`)
+					}
+				}
+			} else {
+				console.log(`\tdescription\t : no-descriptions`)
+			}
+			console.log(`\tdataLength\t :\t${event.getLength()}`)
+			for (let l = 0; l < event.length; l++) {
+				const id = event.id[l]
+				const start = event.start[l]
+				const end = event.end[l]
+				console.log(`${start} - ${end} \n ${id}`)
+			}
+		}
+		if (!hasDescriptions) {
+			console.log(`\tNo events have been found`)
+		}
+	}
 }
 
 module.exports = { Calendar, Event }
