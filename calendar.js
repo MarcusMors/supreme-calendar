@@ -69,6 +69,19 @@ class Calendar {
 			console.log(`\tNo events have been found`)
 		}
 	}
+	getDayEvents(date) {
+		//
+		let events = []
+		for (let i = 0; i < this.events.length; i++) {
+			const event = this.events[i]
+			eventDayStart = event.slice(0, 10)
+			eventDayEnd = event.slice(0, 10)
+			if (eventDayStart === date || eventDayStart === date) {
+				events.push[event]
+			}
+		}
+		return events
+	}
 }
 
 module.exports = { Calendar, Event }

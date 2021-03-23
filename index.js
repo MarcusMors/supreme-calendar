@@ -23,7 +23,7 @@ let headingHome
 
 let descriptionCounters = []
 
-const standardizeAndFirstCheck = async (auth) => {
+const getData = async (auth) => {
 	try {
 		const calendar = google.calendar({ version: "v3", auth })
 		/*********************************************
@@ -179,13 +179,16 @@ const standardizeAndFirstCheck = async (auth) => {
 	}
 }
 
-const listCalendars = async (auth) => {
-	try {
-		const calendar = google.calendar({ version: "v3", auth })
-		console.log(`\n\tcalendars :\n`)
-	} catch (error) {
-		console.error(error)
-	}
+// const getDay = async (auth) => {
+// 	try {
+// 		const calendar = google.calendar({ version: "v3", auth })
+// 		console.log(`\n\tcalendars :\n`)
+// 	} catch (error) {
+// 		console.error(error)
+// 	}
+// }
+function getDay() {
+	//
 }
 
 async function copyExternalCalendars(auth) {
@@ -194,9 +197,10 @@ async function copyExternalCalendars(auth) {
 		// await doCopyCalendarEvents(auth)
 		// what to do if an event of the original calendar changes, is deleted, or a new one is added?
 		console.log(`standardizing the descriptions and first check...`)
-		await standardizeAndFirstCheck(auth)
+		await getData(auth)
+
 		// console.log(`descriptions...`)
-		// await listCalendars(auth)
+		// await getDay(auth)
 	} catch (error) {
 		console.error(error)
 	}
