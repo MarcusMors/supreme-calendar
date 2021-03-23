@@ -188,7 +188,18 @@ const getData = async (auth) => {
 // 	}
 // }
 function getDay() {
-	//
+	let dayEvents = []
+
+	for (let i = 0; i < calendar.length; i++) {
+		dayEvents[i] = []
+	}
+
+	for (let i = 0; i < calendar.length; i++) {
+		for (let j = 0; j < calendar[i].length; j++) {
+			const cal = calendar[i][j]
+			dayEvents[i][j] = cal.getDayEvent(futureDay(k))
+		}
+	}
 }
 
 async function copyExternalCalendars(auth) {
@@ -198,7 +209,7 @@ async function copyExternalCalendars(auth) {
 		// what to do if an event of the original calendar changes, is deleted, or a new one is added?
 		console.log(`standardizing the descriptions and first check...`)
 		await getData(auth)
-
+		await getDay()
 		// console.log(`descriptions...`)
 		// await getDay(auth)
 	} catch (error) {

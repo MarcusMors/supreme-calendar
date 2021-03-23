@@ -49,6 +49,56 @@ class Event {
 			this.descriptions.push({})
 		}
 	}
+	sliceData(start, end) {
+		let ids = this.ids.slice(start, end)
+		let starts = this.starts.slice(start, end)
+		let ends = this.ends.slice(start, end)
+		return [ids, starts, ends]
+	}
+
+	getDayEvents(date, sortByStart = true) {
+		let begun = -1
+		let tail = -1
+		let hasBegin = false
+		const length = this.getLength()
+		if (sortByStart) {
+			for (let i = 0; i < length; i++) {
+				const start = this.starts[i]
+				const startDay = start.slice(0, 10)
+				if (date === startDay) {
+					if (!hasBegin) {
+						begun = 0
+						hasBegin = true
+					}
+				} else {
+					tail = i
+				}
+			}
+		} else {
+			for (let i = 0; i < length; i++) {
+				const end = this.starts[i]
+				const endDay = end.slice(0, 10)
+				if (date === endDay) {
+					if (!hasBegin) {
+						end = 0
+						hasBegin = true
+					}
+				} else {
+					tail = i
+				}
+			}
+		}
+		if (begin !== -1 && tail !== -1) {
+			return this.sliceData(begin, tail)
+		}
+	}
+
+	getDayEventsByPeriod(start, end, sortByStart = true) {
+		let dayEvents = []
+		if (sortByStart) {
+			//
+		}
+	}
 }
 
 module.exports = { Event }

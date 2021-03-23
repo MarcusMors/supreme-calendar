@@ -70,16 +70,21 @@ class Calendar {
 		}
 	}
 	getDayEvents(date) {
-		//
 		let events = []
+		// if (date > 10) {
+		// } else {
 		for (let i = 0; i < this.events.length; i++) {
 			const event = this.events[i]
-			eventDayStart = event.slice(0, 10)
-			eventDayEnd = event.slice(0, 10)
-			if (eventDayStart === date || eventDayStart === date) {
-				events.push[event]
+			const eventsLength = event.getLength()
+			for (let j = 0; j < eventsLength; j++) {
+				const start = event.start[j].slice(0, 10)
+				const end = event.end[j].slice(0, 10)
+				if (start === date || end === date) {
+					events.push[event]
+				}
 			}
 		}
+		// }
 		return events
 	}
 }
