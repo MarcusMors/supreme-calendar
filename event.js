@@ -53,7 +53,8 @@ class Event {
 		let ids = this.ids.slice(start, end)
 		let starts = this.starts.slice(start, end)
 		let ends = this.ends.slice(start, end)
-		return [ids, starts, ends]
+		let descriptions = this.descriptions.slice(start, end)
+		return [ids, starts, ends, descriptions]
 	}
 
 	getDayEvents(date, sortByStart = true) {
