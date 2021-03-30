@@ -1,5 +1,14 @@
 const { Event } = require("./event.js")
 
+function splitDate(date) {
+	const year = date.slice(0, 4)
+	const month = date.slice(5, 7)
+	const day = date.slice(8, 10)
+	const hour = date.slice(11, 13)
+	const minute = date.slice(14, 16)
+	return [year, month, day, hour, minute]
+}
+
 Array.prototype.insert = function (data, position) {
 	if (position >= this.length) {
 		this.push(data)
@@ -12,45 +21,85 @@ Array.prototype.insert = function (data, position) {
 		this[position] = data
 	}
 }
-function (arr, x, start, end) {
 
-    // Base Condition
-    if (start > end) return false;
-
-    // Find the middle index
-    let mid=Math.floor((start + end)/2);
-
-    // Compare mid with given key x
-    if (arr[mid]===x) return true;
-
-    // If element at mid is greater than x,
-    // search in the left half of mid
-    if(arr[mid] > x)
-        return recursiveFunction(arr, x, start, mid-1);
-    else
-
-        // If element at mid is smaller than x,
-        // search in the right half of mid
-        return recursiveFunction(arr, x, mid+1, end);
-}
 function binaryEventInsertion(events, element, begin, tail) {
-	if (tail - begin >= 1) {
-		const mid = Math.floor((tail - begin) / 2)
-		const event = event[mid]
-		if (element.start > event.start) {
-			return binaryEventInsertion(events, element, mid, tail)
-		} else if (element.start < event.start) {
-			return binaryEventInsertion(events, element, begin, tail)
-		} else {
-			if (element.end < event.end) {
-				//
+	if (begin > end) {
+		arr.insert(element, begin)
+		return false
+	}
+	const mid = Math.floor((tail - begin) / 2)
+	const event = event[mid]
+	const [
+		eventStartYear,
+		eventStartMonth,
+		eventStartDay,
+		eventStartHour,
+		eventStartMinute,
+	] = splitDate(event.start)
+	const [
+		elementStartYear,
+		elementStartMonth,
+		elementStartDay,
+		elementStartHour,
+		elementStartMinute,
+	] = splitDate(event.start)
+
+	if (eventStartYear === elementStartYear) {
+		// arr.insert(element, mid)
+		if (eventStartMonth === elementStartMonth) {
+			if (eventStartDay === elementStartDay) {
+				if (eventStartHour === elementStartHour) {
+					if (eventStartMinute === elementStartMinute) {
+						//ENDS
+						const [
+							eventEndYear,
+							eventEndMonth,
+							eventEndDay,
+							eventEndHour,
+							eventEndMinute,
+						] = splitDate(event.End)
+						const [
+							elementEndYear,
+							elementEndMonth,
+							elementEndDay,
+							elementEndHour,
+							elementEndMinute,
+						] = splitDate(event.End)
+					} else if (eventStartMinute > elementStartMinute) {
+						return binaryEventInsertion(
+							events,
+							element,
+							begin,
+							mid - 1
+						)
+					} else {
+						return binaryEventInsertion(
+							events,
+							element,
+							mid + 1,
+							tail
+						)
+					}
+				} else if (eventStartHour > elementStartHour) {
+					return binaryEventInsertion(events, element, begin, mid - 1)
+				} else {
+					return binaryEventInsertion(events, element, mid + 1, tail)
+				}
+			} else if (eventStartDay > elementStartDay) {
+				return binaryEventInsertion(events, element, begin, mid - 1)
 			} else {
-				//
+				return binaryEventInsertion(events, element, mid + 1, tail)
 			}
-			//
+		} else if (eventStartMonth > elementStartMonth) {
+			return binaryEventInsertion(events, element, begin, mid - 1)
+		} else {
+			return binaryEventInsertion(events, element, mid + 1, tail)
 		}
+	}
+	if (eventStartYear > elementStartYear) {
+		return binaryEventInsertion(events, element, begin, mid - 1)
 	} else {
-		// .insert or .splice(index, delete, element 1, element 2)
+		return binaryEventInsertion(events, element, mid + 1, tail)
 	}
 }
 class Calendar {
