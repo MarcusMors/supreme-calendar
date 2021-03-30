@@ -25,81 +25,98 @@ Array.prototype.insert = function (data, position) {
 function binaryEventInsertion(events, element, begin, tail) {
 	if (begin > end) {
 		arr.insert(element, begin)
-		return false
-	}
-	const mid = Math.floor((tail - begin) / 2)
-	const event = event[mid]
-	const [
-		eventStartYear,
-		eventStartMonth,
-		eventStartDay,
-		eventStartHour,
-		eventStartMinute,
-	] = splitDate(event.start)
-	const [
-		elementStartYear,
-		elementStartMonth,
-		elementStartDay,
-		elementStartHour,
-		elementStartMinute,
-	] = splitDate(event.start)
+	} else {
+		const mid = Math.floor((tail + begin) / 2)
+		const event = event[mid]
+		const [
+			eventStartYear,
+			eventStartMonth,
+			eventStartDay,
+			eventStartHour,
+			eventStartMinute,
+		] = splitDate(event.start)
+		const [
+			elementStartYear,
+			elementStartMonth,
+			elementStartDay,
+			elementStartHour,
+			elementStartMinute,
+		] = splitDate(event.start)
 
-	if (eventStartYear === elementStartYear) {
-		// arr.insert(element, mid)
-		if (eventStartMonth === elementStartMonth) {
-			if (eventStartDay === elementStartDay) {
-				if (eventStartHour === elementStartHour) {
-					if (eventStartMinute === elementStartMinute) {
-						//ENDS
-						const [
-							eventEndYear,
-							eventEndMonth,
-							eventEndDay,
-							eventEndHour,
-							eventEndMinute,
-						] = splitDate(event.End)
-						const [
-							elementEndYear,
-							elementEndMonth,
-							elementEndDay,
-							elementEndHour,
-							elementEndMinute,
-						] = splitDate(event.End)
-					} else if (eventStartMinute > elementStartMinute) {
-						return binaryEventInsertion(
-							events,
-							element,
-							begin,
-							mid - 1
-						)
+		if (eventStartYear === elementStartYear) {
+			if (eventStartMonth === elementStartMonth) {
+				if (eventStartDay === elementStartDay) {
+					if (eventStartHour === elementStartHour) {
+						if (eventStartMinute === elementStartMinute) {
+							//ENDS
+							const [
+								eventEndYear,
+								eventEndMonth,
+								eventEndDay,
+								eventEndHour,
+								eventEndMinute,
+							] = splitDate(event.End)
+							const [
+								elementEndYear,
+								elementEndMonth,
+								elementEndDay,
+								elementEndHour,
+								elementEndMinute,
+							] = splitDate(element.End)
+							// the same up but end instead of start
+							eventEndYear === elementEndYear
+								? eventEndMonth === elementEndMonth
+									? eventEndDay === elementEndDay
+										? eventEndHour === elementEndHour
+											? eventEndMinute <= elementEndMinute
+												? events.insert(
+														element,
+														begin + 1
+												  )
+												: events.insert(element, begin)
+											: eventEndHour > elementEndHour
+											? events.insert(element, begin + 1)
+											: events.insert(element, begin)
+										: eventEndHour > elementEndHour
+										? events.insert(element, begin + 1)
+										: events.insert(element, begin)
+									: eventEndMonth > elementEndMonth
+									? events.insert(element, begin + 1)
+									: events.insert(element, begin)
+								: eventEndYear > elementEndYear
+								? events.insert(element, begin + 1)
+								: events.insert(element, begin)
+						} else if (eventStartMinute > elementStartMinute) {
+							binaryEventInsertion(
+								events,
+								element,
+								begin,
+								mid - 1
+							)
+						} else {
+							binaryEventInsertion(events, element, mid + 1, tail)
+						}
+					} else if (eventStartHour > elementStartHour) {
+						binaryEventInsertion(events, element, begin, mid - 1)
 					} else {
-						return binaryEventInsertion(
-							events,
-							element,
-							mid + 1,
-							tail
-						)
+						binaryEventInsertion(events, element, mid + 1, tail)
 					}
-				} else if (eventStartHour > elementStartHour) {
-					return binaryEventInsertion(events, element, begin, mid - 1)
+				} else if (eventStartDay > elementStartDay) {
+					binaryEventInsertion(events, element, begin, mid - 1)
 				} else {
-					return binaryEventInsertion(events, element, mid + 1, tail)
+					binaryEventInsertion(events, element, mid + 1, tail)
 				}
-			} else if (eventStartDay > elementStartDay) {
-				return binaryEventInsertion(events, element, begin, mid - 1)
+			} else if (eventStartMonth > elementStartMonth) {
+				binaryEventInsertion(events, element, begin, mid - 1)
 			} else {
-				return binaryEventInsertion(events, element, mid + 1, tail)
+				binaryEventInsertion(events, element, mid + 1, tail)
 			}
-		} else if (eventStartMonth > elementStartMonth) {
-			return binaryEventInsertion(events, element, begin, mid - 1)
-		} else {
-			return binaryEventInsertion(events, element, mid + 1, tail)
 		}
 	}
 	if (eventStartYear > elementStartYear) {
-		return binaryEventInsertion(events, element, begin, mid - 1)
+		binaryEventInsertion(events, element, begin, mid - 1)
 	} else {
-		return binaryEventInsertion(events, element, mid + 1, tail)
+		binaryEventInsertion(events, element, mid + 1, tail)
 	}
 }
 class Calendar {
