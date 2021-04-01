@@ -66,14 +66,15 @@ const getData = async (auth) => {
 				}
 			}
 		}
-		console.log(`calendars:`)
-		for (let i = 0; i <= +lowestPriority; i++) {
-			for (let j = 0; j < calendars[i].length; j++) {
-				console.log(
-					`calendars[${i}][${j}] : ${calendars[i][j].summary}`
-				)
-			}
-		}
+		// checking the calendar instances
+		// console.log(`calendars:`)
+		// for (let i = 0; i <= +lowestPriority; i++) {
+		// 	for (let j = 0; j < calendars[i].length; j++) {
+		// 		console.log(
+		// 			`calendars[${i}][${j}] : ${calendars[i][j].summary}`
+		// 		)
+		// 	}
+		// }
 
 		/*********************************************
 		 * Creating Event instances in calendar instance
@@ -82,7 +83,7 @@ const getData = async (auth) => {
 		for (let i = 0; i < +lowestPriority + 1; i++) {
 			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
-				console.log(`calendars[${i}][${j}] : ${cal.summary}`)
+				// console.log(`calendars[${i}][${j}] : ${cal.summary}`)
 				const listEventsResponse = await calendar.events.list({
 					calendarId: cal.id,
 					timeMin: new Date().toISOString(),
@@ -95,9 +96,9 @@ const getData = async (auth) => {
 					const events = listEventsResponse.data.items
 
 					if (events) {
-						console.log(
-							`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
-						)
+						// console.log(
+						// 	`\n\tUpcoming 10 events in [${i}][${j}] calendar:\n`
+						// )
 						for (let k = 0; k < events.length; k++) {
 							const event = events[k]
 							const start =
@@ -127,12 +128,12 @@ const getData = async (auth) => {
 										summary
 									)
 
-									console.log(`eventIndex : ${eventIndex}`)
+									// console.log(`eventIndex : ${eventIndex}`)
 
 									if (+eventIndex === -1) {
-										console.log(
-											`inside if eventIndex : ${eventIndex}`
-										)
+										// console.log(
+										// 	`inside if eventIndex : ${eventIndex}`
+										// )
 										cal.addEvent(
 											summary,
 											description,
@@ -141,9 +142,9 @@ const getData = async (auth) => {
 											end
 										)
 									} else {
-										console.log(
-											`else eventIndex : ${eventIndex}`
-										)
+										// console.log(
+										// 	`else eventIndex : ${eventIndex}`
+										// )
 										cal.events[eventIndex].addData(
 											id,
 											start,
@@ -152,18 +153,18 @@ const getData = async (auth) => {
 										)
 									}
 								}
-								console.log(`${start} - ${end} | ${summary}`)
+								// console.log(`${start} - ${end} | ${summary}`)
 							}
 						}
 						descriptionCounters = []
-					} else {
-						console.log("No upcoming events found.")
+						// } else {
+						// console.log("No upcoming events found.")
 					}
-				} else {
-					console.log(`An error happened`)
+					// } else {
+					// console.log(`An error happened`)
 				}
 			}
-			console.log(`\t\t<--  No more events in ${i} priority  -->`)
+			// console.log(`\t\t<--  No more events in ${i} priority  -->`)
 		}
 
 		//making sure the data structure is filled
@@ -190,14 +191,28 @@ const getData = async (auth) => {
 function getDay() {
 	let dayEvents = []
 
-	for (let i = 0; i < calendar.length; i++) {
+	for (let i = 0; i < calendars.length; i++) {
 		dayEvents[i] = []
 	}
 
-	for (let i = 0; i < calendar.length; i++) {
-		for (let j = 0; j < calendar[i].length; j++) {
-			const cal = calendar[i][j]
-			dayEvents[i][j] = cal.getDayEvent(futureDay(k))
+	for (let i = 0; i < calendars.length; i++) {
+		for (let j = 0; j < calendars[i].length; j++) {
+			const cal = calendars[i][j]
+			dayEvents[i][j] = cal.getDayEvents(futureDay(1))
+		}
+	}
+
+	console.log(`checking event starts`)
+	for (let i = 0; i < dayEvents.length; i++) {
+		for (let j = 0; j < dayEvents[i].length; j++) {
+			const events = dayEvents[i][j]
+			console.log(
+				`calendars[${i}][${j}].summary : ${calendars[i][j].summary}`
+			)
+			for (let k = 0; k < events.length; k++) {
+				const event = events[k]
+				console.log(event.start)
+			}
 		}
 	}
 }

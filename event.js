@@ -1,3 +1,5 @@
+const { splitDate } = require("./functions")
+
 class Event {
 	constructor(summary) {
 		this.summary = summary
@@ -57,40 +59,58 @@ class Event {
 		return [ids, starts, ends, descriptions]
 	}
 
-	getDayEvents(date, sortByStart = true) {
-		let begun = -1
+	getDayEvents(date) {
+		let begin = -1
 		let tail = -1
 		let hasBegin = false
 		const length = this.getLength()
-		if (sortByStart) {
-			for (let i = 0; i < length; i++) {
-				const start = this.starts[i]
-				const startDay = start.slice(0, 10)
-				if (date === startDay) {
-					if (!hasBegin) {
-						begun = 0
+		const [dateYear, dateMonth, dateDay, dateHour, dateMinute] = splitDate(
+			date
+		)
+		for (let i = 0; i < length; i++) {
+			const start = this.starts[i]
+			const [
+				startYear,
+				startMonth,
+				startDay,
+				startHour,
+				startMinute,
+			] = splitDate(start)
+			// console.log(`date : ${date}\nstart : ${startDay}`)
+			if (dateYear <= startYear) {
+				if (dateMonth <= startMonth) {
+					if (dateDay <= startDay) {
+						if (dateHour <= startHour) {
+							if (startMinute <= startMinute) {
+								if (!hasBegin) {
+									begin = 0
+									hasBegin = true
+								}
+							} else if (!hasBegin) {
+								begin = 0
+								hasBegin = true
+							}
+						} else if (!hasBegin) {
+							begin = 0
+							hasBegin = true
+						}
+					} else if (!hasBegin) {
+						begin = 0
 						hasBegin = true
 					}
-				} else {
-					tail = i
+				} else if (!hasBegin) {
+					begin = 0
+					hasBegin = true
 				}
-			}
-		} else {
-			for (let i = 0; i < length; i++) {
-				const end = this.starts[i]
-				const endDay = end.slice(0, 10)
-				if (date === endDay) {
-					if (!hasBegin) {
-						end = 0
-						hasBegin = true
-					}
-				} else {
-					tail = i
-				}
+			} else {
+				tail = i
 			}
 		}
-		if (begin !== -1 && tail !== -1) {
-			return this.sliceData(begin, tail)
+		if (begin !== -1 || tail !== -1) {
+			let [ids, starts, ends, descriptions] = this.sliceData(begin, tail)
+			return [ids, starts, ends, descriptions]
+		} else {
+			return [false, false, false, false]
 		}
 	}
 

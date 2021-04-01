@@ -1,33 +1,61 @@
 const { Event } = require("./event.js")
-
-function splitDate(date) {
-	const year = date.slice(0, 4)
-	const month = date.slice(5, 7)
-	const day = date.slice(8, 10)
-	const hour = date.slice(11, 13)
-	const minute = date.slice(14, 16)
-	return [year, month, day, hour, minute]
-}
-
-Array.prototype.insert = function (data, position) {
-	if (position >= this.length) {
-		this.push(data)
-	} else if (position <= 0) {
+const { splitDate } = require("./functions")
+Array.prototype.move = function (length, position) {
+	const data = this[length]
+	if (position <= 0) {
 		this.unshift(data)
 	} else {
-		for (let i = this.length; i >= position; i--) {
+		for (let i = length; i >= position; i--) {
 			this[i] = this[i - 1]
 		}
 		this[position] = data
 	}
 }
+function merge(left, right) {
+	let arr = []
+	// Break out of loop if any one of the array gets empty
+	while (left.length && right.length) {
+		// Pick the smaller among the smallest element of left and right sub arrays
+		if (left[0] < right[0]) {
+			arr.push(left.shift())
+		} else {
+			arr.push(right.shift())
+		}
+	}
 
-function binaryEventInsertion(events, element, begin, tail) {
-	if (begin > end) {
-		arr.insert(element, begin)
+	// Concatenating the leftover elements
+	// (in case we didn't go through the entire left or right array)
+	return [...arr, ...left, ...right]
+}
+function mergeSort(array) {
+	const half = array.length / 2
+
+	// Base case or terminating case
+	if (array.length < 2) {
+		return array
+	}
+
+	const left = array.splice(0, half)
+	return merge(mergeSort(left), mergeSort(array))
+}
+
+function binaryEventInsertion(events, element, begin, tail, length) {
+	console.log(`begin : ${begin}\ttail : ${tail}`)
+	if (begin > tail) {
+		console.log("\tbase condition")
+		// console.log(`\t\toldId : ${element.id}`)
+		// console.log(`\t\toldStart : ${element.start}`)
+		// console.log(`\t\toldEnd : ${element.end}`)
+		events.move(length, begin)
+		// console.log(`\t\tnewId : ${events[begin].id}`)
+		// console.log(`\t\tnewStart : ${events[begin].start}`)
+		// console.log(`\t\tnewEnd : ${events[begin].end}`)
+		// console.log(`\t\tnextId : ${events[begin + 1].id}`)
+		// console.log(`\t\tnextStart : ${events[begin + 1].start}`)
+		// console.log(`\t\tnextEnd : ${events[begin + 1].end}`)
 	} else {
 		const mid = Math.floor((tail + begin) / 2)
-		const event = event[mid]
+		const event = events[mid]
 		const [
 			eventStartYear,
 			eventStartMonth,
@@ -41,13 +69,28 @@ function binaryEventInsertion(events, element, begin, tail) {
 			elementStartDay,
 			elementStartHour,
 			elementStartMinute,
-		] = splitDate(event.start)
+		] = splitDate(element.start)
 
 		if (eventStartYear === elementStartYear) {
+			console.log(
+				`\teventStartYear\t= elementStartYear\t: ${eventStartYear} = ${elementStartYear}`
+			)
 			if (eventStartMonth === elementStartMonth) {
+				console.log(
+					`\teventStartMonth\t= elementStartMonth\t: ${eventStartMonth} = ${elementStartMonth}`
+				)
 				if (eventStartDay === elementStartDay) {
+					console.log(
+						`\teventStartDay\t= elementStartDay\t: ${eventStartDay} = ${elementStartDay}`
+					)
 					if (eventStartHour === elementStartHour) {
+						console.log(
+							`\teventStartHour\t= elementStartHour\t: ${eventStartHour} = ${elementStartHour}`
+						)
 						if (eventStartMinute === elementStartMinute) {
+							console.log(
+								`\teventStartMinute\t= elementStartMinute\t: ${eventStartMinute} = ${elementStartMinute}`
+							)
 							//ENDS
 							const [
 								eventEndYear,
@@ -55,70 +98,168 @@ function binaryEventInsertion(events, element, begin, tail) {
 								eventEndDay,
 								eventEndHour,
 								eventEndMinute,
-							] = splitDate(event.End)
+							] = splitDate(event.end)
 							const [
 								elementEndYear,
 								elementEndMonth,
 								elementEndDay,
 								elementEndHour,
 								elementEndMinute,
-							] = splitDate(element.End)
+							] = splitDate(element.end)
 							// the same up but end instead of start
-							eventEndYear === elementEndYear
-								? eventEndMonth === elementEndMonth
-									? eventEndDay === elementEndDay
-										? eventEndHour === elementEndHour
-											? eventEndMinute <= elementEndMinute
-												? events.insert(
-														element,
-														begin + 1
-												  )
-												: events.insert(element, begin)
-											: eventEndHour > elementEndHour
-											? events.insert(element, begin + 1)
-											: events.insert(element, begin)
-										: eventEndHour > elementEndHour
-										? events.insert(element, begin + 1)
-										: events.insert(element, begin)
-									: eventEndMonth > elementEndMonth
-									? events.insert(element, begin + 1)
-									: events.insert(element, begin)
-								: eventEndYear > elementEndYear
-								? events.insert(element, begin + 1)
-								: events.insert(element, begin)
+							if (eventEndYear === elementEndYear) {
+								if (eventEndMonth === elementEndMonth) {
+									if (eventEndDay === elementEndDay) {
+										if (eventEndHour === elementEndHour) {
+											if (
+												eventEndMinute <=
+												elementEndMinute
+											) {
+												console.log(
+													`\teventEndMinute\t<= elementEndMinute\t: ${eventEndMinute} <= ${elementEndMinute}`
+												)
+												events.move(length, mid + 1)
+											} else {
+												events.move(length, mid)
+												console.log(
+													`\teventEndMinute\t> elementEndMinute\t: ${eventEndMinute} > ${elementEndMinute}`
+												)
+											}
+										} else if (
+											eventEndHour > elementEndHour
+										) {
+											console.log(
+												`\teventEndHour\t> elementEndHour\t: ${eventEndHour} > ${elementEndHour}`
+											)
+											events.move(length, mid + 1)
+										} else {
+											console.log(
+												`\teventEndHour\t> elementEndHour\t: ${eventEndHour} > ${elementEndHour}`
+											)
+											events.move(length, mid)
+										}
+									} else if (eventEndDay > elementEndDay) {
+										console.log(
+											`\teventEndDay\t> elementEndDay\t: ${eventEndDay} > ${elementEndDay}`
+										)
+										events.move(length, mid + 1)
+									} else {
+										console.log(
+											`\teventEndDay\t< elementEndDay\t: ${eventEndDay} < ${elementEndDay}`
+										)
+										events.move(length, mid)
+									}
+								} else if (eventEndMonth > elementEndMonth) {
+									console.log(
+										`\teventEndMonth\t> elementEndMonth\t: ${eventEndMonth} > ${elementEndMonth}`
+									)
+									events.move(length, mid + 1)
+								} else {
+									console.log(
+										`\teventEndMonth\t< elementEndMonth\t: ${eventEndMonth} < ${elementEndMonth}`
+									)
+									events.move(length, mid)
+								}
+							} else if (eventEndYear > elementEndYear) {
+								console.log(
+									`\teventEndYear\t> elementEndYear\t: ${eventEndYear} > ${elementEndYear}`
+								)
+								events.move(length, mid + 1)
+							} else {
+								console.log(
+									`\teventEndYear\t< elementEndYear\t: ${eventEndYear} < ${elementEndYear}`
+								)
+								events.move(length, mid)
+							}
 						} else if (eventStartMinute > elementStartMinute) {
+							console.log(
+								`\teventStartMinute\t> elementStartMinute\t: ${eventStartMinute} > ${elementStartMinute}`
+							)
 							binaryEventInsertion(
 								events,
 								element,
 								begin,
-								mid - 1
+								mid - 1,
+								length
 							)
 						} else {
-							binaryEventInsertion(events, element, mid + 1, tail)
+							console.log(
+								`\teventStartMinute\t< elementStartMinute\t: ${eventStartMinute} < ${elementStartMinute}`
+							)
+							binaryEventInsertion(
+								events,
+								element,
+								mid + 1,
+								tail,
+								length
+							)
 						}
 					} else if (eventStartHour > elementStartHour) {
-						binaryEventInsertion(events, element, begin, mid - 1)
+						console.log(
+							`\teventStartHour\t> elementStartHour\t: ${eventStartHour} > ${elementStartHour}`
+						)
+						binaryEventInsertion(
+							events,
+							element,
+							begin,
+							mid - 1,
+							length
+						)
 					} else {
-						binaryEventInsertion(events, element, mid + 1, tail)
+						console.log(
+							`\teventStartHour\t< elementStartHour\t: ${eventStartHour} < ${elementStartHour}`
+						)
+						binaryEventInsertion(
+							events,
+							element,
+							mid + 1,
+							tail,
+							length
+						)
 					}
 				} else if (eventStartDay > elementStartDay) {
-					binaryEventInsertion(events, element, begin, mid - 1)
+					console.log(
+						`\teventStartDay\t> elementStartDay\t: ${eventStartDay} > ${elementStartDay}`
+					)
+					binaryEventInsertion(
+						events,
+						element,
+						begin,
+						mid - 1,
+						length
+					)
 				} else {
-					binaryEventInsertion(events, element, mid + 1, tail)
+					console.log(
+						`\teventStartDay\t< elementStartDay\t: ${eventStartDay} < ${elementStartDay}`
+					)
+					binaryEventInsertion(events, element, mid + 1, tail, length)
 				}
 			} else if (eventStartMonth > elementStartMonth) {
-				binaryEventInsertion(events, element, begin, mid - 1)
+				console.log(
+					`\teventStartMonth\t> elementStartMonth\t: ${eventStartMonth} > ${elementStartMonth}`
+				)
+				binaryEventInsertion(events, element, begin, mid - 1, length)
 			} else {
-				binaryEventInsertion(events, element, mid + 1, tail)
+				console.log(
+					`\teventStartMonth\t< elementStartMonth\t: ${eventStartMonth} < ${elementStartMonth}`
+				)
+				binaryEventInsertion(events, element, mid + 1, tail, length)
 			}
+		} else if (eventStartYear > elementStartYear) {
+			console.log(
+				`\teventStartYear\t> elementStartYear\t: ${eventStartYear} > ${elementStartYear}`
+			)
+			binaryEventInsertion(events, element, begin, mid - 1, length)
+		} else {
+			console.log(
+				`\teventStartYear\t< elementStartYear\t: ${eventStartYear} < ${elementStartYear}`
+			)
+			console.log(`\t\tRETURNED`)
+			binaryEventInsertion(events, element, mid + 1, tail, length)
 		}
 	}
-	if (eventStartYear > elementStartYear) {
-		binaryEventInsertion(events, element, begin, mid - 1)
-	} else {
-		binaryEventInsertion(events, element, mid + 1, tail)
-	}
 }
+
 class Calendar {
 	constructor(summary, id) {
 		this.summary = summary
@@ -188,56 +329,60 @@ class Calendar {
 			console.log(`\tNo events have been found`)
 		}
 	}
-	getDayEvents(date, sortByStart = true) {
+	getDayEvents(date) {
 		let events = []
-		if (date > 10) {
-		} else {
-			for (let i = 0; i < this.eventsLength; i++) {
-				const event = this.events[i]
-				const [ids, starts, ends, descriptions] = event.getDayEvents(
-					date,
-					sortByStart
-				)
+
+		for (let i = 0; i < this.eventsLength; i++) {
+			const event = this.events[i]
+			const [ids, starts, ends, descriptions] = event.getDayEvents(date)
+			if (ids && starts && ends) {
+				// undefined checker
 				for (let j = 0; j < ids.length; j++) {
-					const id = ids[j]
-					const start = starts[j]
-					const end = ends[j]
-					const description = descriptions[j]
 					const eventObj = {
 						summary: event.summary,
-						id: id,
-						start: start,
-						end: end,
-						description: description,
+						id: ids[j],
+						start: starts[j],
+						end: ends[j],
+						description: descriptions[j],
 					}
 					events.push(eventObj)
 				}
 			}
-			//sort
-			// eg. 2021-03-24T19:23:28.132Z
-			const eventsLength = events.length
-			if (eventsLength < 64) {
-				//insertion sort
-				let sortedLength = 1
-				for (let i = 1; i < eventsLength; i++) {
-					// let auxEventYear
-					// let auxEventMonth
-					// let auxEventDay
-					const event = events[i]
-					// const year = event.start.slice(0, 4)
-					const day = event.start.slice(0, 4)
-					for (let j = 0; j < sortedLength; j++) {
-						//
-					}
+		}
+		//sort
+		// eg. 2021-03-24T19:23:28.132Z
+		//insertion sort
+		if (events) {
+			console.log("<<<<<<<<<<<<>>>>>>>>>>>>")
+			for (let i = 0; i < events.length; i++) {
+				const event = events[i]
+				console.log(`i : ${i}`)
+				console.log(event)
+			}
+			for (let i = 1; i < events.length; i++) {
+				const event = events[i]
+				console.log(`event[${i}]:`)
+				console.log(event)
+				console.log(`event[${i + 1}]:`)
+				console.log(events[i + 1])
+				if (event) {
+					binaryEventInsertion(events, event, 0, i - 1, i)
 				}
-			} else {
-				for (let i = 0; i < eventsLength; i++) {
-					const event = events[i]
+				console.log(
+					`<<<<<<<<<<<<<<<<<<<SORTED EVENTS>>>>>>>>>>>>>>>>>>>>`
+				)
+				for (let j = 0; j <= i; j++) {
+					const event = events[j]
+					console.log(`j : ${j}`)
+					console.log(event.summary)
+					console.log(event.id)
+					console.log(event.start)
+					console.log(event.end)
 				}
+				console.log(`<<<<<<<<<---------END SORTED-------->>>>>>>>>\n`)
 			}
 		}
 		return events
 	}
 }
-
 module.exports = { Calendar, Event }
