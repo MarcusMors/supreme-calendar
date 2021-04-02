@@ -1,21 +1,24 @@
-function futureDay(days = 14, withTime = false) {
+function futureDay(days = 14, withTime = true) {
 	const today = new Date()
 	if (withTime) {
 		const futureDay = new Date(
 			today.getFullYear(),
 			today.getMonth(),
 			today.getDate() + days,
-			today.getHours(),
+			today.getHours() - 5,
 			today.getMinutes()
 		).toISOString()
 		return futureDay
+	} else {
+		const futureDay = new Date(
+			today.getFullYear(),
+			today.getMonth(),
+			today.getDate() + days,
+			-5,
+			0
+		).toISOString()
+		return futureDay
 	}
-	const futureDay = new Date(
-		today.getFullYear(),
-		today.getMonth(),
-		today.getDate() + days
-	).toISOString()
-	return futureDay
 }
 
 function arrayIncludes(arr, wanted) {

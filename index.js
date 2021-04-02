@@ -180,17 +180,9 @@ const getData = async (auth) => {
 	}
 }
 
-// const getDay = async (auth) => {
-// 	try {
-// 		const calendar = google.calendar({ version: "v3", auth })
-// 		console.log(`\n\tcalendars :\n`)
-// 	} catch (error) {
-// 		console.error(error)
-// 	}
-// }
-function getDay() {
-	let dayEvents = []
+let dayEvents = []
 
+function getDay() {
 	for (let i = 0; i < calendars.length; i++) {
 		dayEvents[i] = []
 	}
@@ -198,7 +190,9 @@ function getDay() {
 	for (let i = 0; i < calendars.length; i++) {
 		for (let j = 0; j < calendars[i].length; j++) {
 			const cal = calendars[i][j]
-			dayEvents[i][j] = cal.getDayEvents(futureDay(1))
+			const startDate = futureDay(0)
+			const endDate = futureDay(2, false)
+			dayEvents[i][j] = cal.getDayEvents(startDate, endDate)
 		}
 	}
 
@@ -211,7 +205,7 @@ function getDay() {
 			)
 			for (let k = 0; k < events.length; k++) {
 				const event = events[k]
-				console.log(event.start)
+				console.log(`\tevent.start : ${event.start}`)
 			}
 		}
 	}

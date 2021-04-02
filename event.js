@@ -59,65 +59,52 @@ class Event {
 		return [ids, starts, ends, descriptions]
 	}
 
-	getDayEvents(date) {
+	getDayEvents(startDate, endDate) {
 		let begin = -1
 		let tail = -1
-		let hasBegin = false
 		const length = this.getLength()
-		const [dateYear, dateMonth, dateDay, dateHour, dateMinute] = splitDate(
-			date
-		)
+		// const [
+		// 	startDateYear,
+		// 	startDateMonth,
+		// 	startDateDay,
+		// 	startDateHour,
+		// 	startDateMinute,
+		// ] = splitDate(startDate)
+		// const [
+		// 	endDateYear,
+		// 	endDateMonth,
+		// 	endDateDay,
+		// 	endDateHour,
+		// 	endDateMinute,
+		// ] = splitDate(endDate)
+		// console.log(`length: ${length}`)
 		for (let i = 0; i < length; i++) {
-			const start = this.starts[i]
-			const [
-				startYear,
-				startMonth,
-				startDay,
-				startHour,
-				startMinute,
-			] = splitDate(start)
-			// console.log(`date : ${date}\nstart : ${startDay}`)
-			if (dateYear <= startYear) {
-				if (dateMonth <= startMonth) {
-					if (dateDay <= startDay) {
-						if (dateHour <= startHour) {
-							if (startMinute <= startMinute) {
-								if (!hasBegin) {
-									begin = 0
-									hasBegin = true
-								}
-							} else if (!hasBegin) {
-								begin = 0
-								hasBegin = true
-							}
-						} else if (!hasBegin) {
-							begin = 0
-							hasBegin = true
-						}
-					} else if (!hasBegin) {
-						begin = 0
-						hasBegin = true
-					}
-				} else if (!hasBegin) {
-					begin = 0
-					hasBegin = true
+			const eventStart = this.starts[i]
+			// const [
+			// 	eventYear,
+			// 	eventMonth,
+			// 	eventDay,
+			// 	eventHour,
+			// 	eventMinute,
+			// ] = splitDate(eventStart)
+			// console.log(eventStart)
+			if (startDate < eventStart && eventStart < endDate) {
+				if (begin === -1) {
+					begin = i
 				}
-			} else {
 				tail = i
 			}
 		}
+		// console.log(`begin: ${begin}`)
+		// console.log(`tail: ${tail}`)
 		if (begin !== -1 || tail !== -1) {
-			let [ids, starts, ends, descriptions] = this.sliceData(begin, tail)
+			let [ids, starts, ends, descriptions] = this.sliceData(
+				begin,
+				tail + 1
+			)
 			return [ids, starts, ends, descriptions]
 		} else {
 			return [false, false, false, false]
-		}
-	}
-
-	getDayEventsByPeriod(start, end, sortByStart = true) {
-		let dayEvents = []
-		if (sortByStart) {
-			//
 		}
 	}
 }

@@ -329,12 +329,15 @@ class Calendar {
 			console.log(`\tNo events have been found`)
 		}
 	}
-	getDayEvents(date) {
+	getDayEvents(startDate, endDate) {
 		let events = []
 
 		for (let i = 0; i < this.eventsLength; i++) {
 			const event = this.events[i]
-			const [ids, starts, ends, descriptions] = event.getDayEvents(date)
+			const [ids, starts, ends, descriptions] = event.getDayEvents(
+				startDate,
+				endDate
+			)
 			if (ids && starts && ends) {
 				// undefined checker
 				for (let j = 0; j < ids.length; j++) {
