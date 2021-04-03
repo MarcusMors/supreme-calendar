@@ -1,10 +1,11 @@
 const { google } = require("googleapis")
 const fs = require("fs")
 const { request } = require("http")
-const { Calendar, Event } = require("./calendar.js")
+const { Calendar } = require("./calendar.js")
 const { futureDay, arrayIncludes } = require("./functions.js")
 const { authorize } = require("./gapiFunctions.js")
 const { doCopyCalendarEvents } = require("./copyCalendarEvents.js")
+let csv = require("csv")
 
 // Load client secrets from a local file.
 fs.readFile("credentials.json", (err, content) => {
@@ -182,33 +183,60 @@ const getData = async (auth) => {
 
 let dayEvents = []
 
-function getDay() {
+function mainProcess(days) {
+	// turn dayEvents into a 2D array
 	for (let i = 0; i < calendars.length; i++) {
 		dayEvents[i] = []
 	}
-
+	/*********************************************
+	 * Getting a specific day events
+	 *********************************************/
+	//get today events, from now until the end of the day
 	for (let i = 0; i < calendars.length; i++) {
 		for (let j = 0; j < calendars[i].length; j++) {
 			const cal = calendars[i][j]
 			const startDate = futureDay(0)
-			const endDate = futureDay(2, false)
+			const endDate = futureDay(1, false)
 			dayEvents[i][j] = cal.getDayEvents(startDate, endDate)
 		}
 	}
-
+	//checking the content
 	console.log(`checking event starts`)
 	for (let i = 0; i < dayEvents.length; i++) {
 		for (let j = 0; j < dayEvents[i].length; j++) {
 			const events = dayEvents[i][j]
-			console.log(
-				`calendars[${i}][${j}].summary : ${calendars[i][j].summary}`
-			)
+			const cal = calendars[i][j]
+			console.log(`calendar : ${cal.summary}`)
 			for (let k = 0; k < events.length; k++) {
 				const event = events[k]
 				console.log(`\tevent.start : ${event.start}`)
 			}
 		}
 	}
+	/*********************************************
+	 * First Check
+	 *********************************************/
+
+	/*********************************************
+	 * Second Check
+	 *********************************************/
+
+	/*********************************************
+	 * Third Check
+	 *********************************************/
+
+	//the events of the next two weeks
+	// for (let i = 1; i < days; i++) {
+	// 	for (let j = 0; j < calendars.length; j++) {
+	// 		for (let k = 0; k < calendars[j].length; k++) {
+	// 			const cal = calendars[j][k]
+	// 			const startDate = futureDay(i, false)
+	// 			const endDate = futureDay(i + 1, false)
+	// 			dayEvents[j][k] = cal.getDayEvents(startDate, endDate)
+	// 		}
+	// 	}
+	// 	// reorder and etc
+	// }
 }
 
 async function copyExternalCalendars(auth) {
@@ -218,7 +246,8 @@ async function copyExternalCalendars(auth) {
 		// what to do if an event of the original calendar changes, is deleted, or a new one is added?
 		console.log(`standardizing the descriptions and first check...`)
 		await getData(auth)
-		await getDay()
+		const days = 14
+		await mainProcess(days)
 		// console.log(`descriptions...`)
 		// await getDay(auth)
 	} catch (error) {

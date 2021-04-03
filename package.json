@@ -12,6 +12,7 @@
   "author": "José Vilca Campana <@marcusmors>",
   "license": "ISC",
   "dependencies": {
+    "csv": "^5.4.0",
     "googleapis": "^39.2.0"
   }
 }

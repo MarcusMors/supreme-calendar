@@ -40,37 +40,37 @@ function mergeSort(array) {
 }
 
 function binaryEventInsertion(events, element, begin, tail, length) {
-	console.log(`begin : ${begin}\ttail : ${tail}`)
 	if (begin > tail) {
-		console.log("\tbase condition")
-		// console.log(`\t\toldId : ${element.id}`)
-		// console.log(`\t\toldStart : ${element.start}`)
-		// console.log(`\t\toldEnd : ${element.end}`)
 		events.move(length, begin)
-		// console.log(`\t\tnewId : ${events[begin].id}`)
-		// console.log(`\t\tnewStart : ${events[begin].start}`)
-		// console.log(`\t\tnewEnd : ${events[begin].end}`)
-		// console.log(`\t\tnextId : ${events[begin + 1].id}`)
-		// console.log(`\t\tnextStart : ${events[begin + 1].start}`)
-		// console.log(`\t\tnextEnd : ${events[begin + 1].end}`)
 	} else {
 		const mid = Math.floor((tail + begin) / 2)
 		const event = events[mid]
-		const [
-			eventStartYear,
-			eventStartMonth,
-			eventStartDay,
-			eventStartHour,
-			eventStartMinute,
-		] = splitDate(event.start)
-		const [
-			elementStartYear,
-			elementStartMonth,
-			elementStartDay,
-			elementStartHour,
-			elementStartMinute,
-		] = splitDate(element.start)
-
+		// const [
+		// 	eventStartYear,
+		// 	eventStartMonth,
+		// 	eventStartDay,
+		// 	eventStartHour,
+		// 	eventStartMinute,
+		// ] = splitDate(event.start)
+		// const [
+		// 	elementStartYear,
+		// 	elementStartMonth,
+		// 	elementStartDay,
+		// 	elementStartHour,
+		// 	elementStartMinute,
+		// ] = splitDate(element.start)
+		if (element.start === event.start) {
+			if (element.end >= event.end) {
+				events.move(length, mid + 1)
+			} else {
+				events.move(length, mid)
+			}
+		} else if (element.start > event.start) {
+			binaryEventInsertion(events, element, mid + 1, tail, length)
+		} else {
+			binaryEventInsertion(events, element, begin, mid - 1, length)
+		}
+		/*
 		if (eventStartYear === elementStartYear) {
 			console.log(
 				`\teventStartYear\t= elementStartYear\t: ${eventStartYear} = ${elementStartYear}`
@@ -257,6 +257,7 @@ function binaryEventInsertion(events, element, begin, tail, length) {
 			console.log(`\t\tRETURNED`)
 			binaryEventInsertion(events, element, mid + 1, tail, length)
 		}
+		*/
 	}
 }
 
