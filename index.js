@@ -18,10 +18,12 @@ const DATA_PATH = "data.json"
 function setData(callback, auth) {
 	console.log("setData")
 	let data = getData(auth)
+	// data = JSON.stringify(data)
 	fs.writeFile(DATA_PATH, JSON.stringify(data), (err) => {
 		if (err) return console.error(err)
 		console.log("data stored to", DATA_PATH)
 	})
+	console.log(data)
 	callback(data)
 }
 
@@ -31,7 +33,8 @@ let headingHome
 const getData = async (auth) => {
 	try {
 		// calendars is the main variable
-		let calendars = {}
+		let calendars = []
+		// let calendars = {}
 		let lowestPriority = -1
 		let totalCalendars = 0
 		const calendar = google.calendar({ version: "v3", auth })
@@ -56,8 +59,12 @@ const getData = async (auth) => {
 		}
 		// Turning the array into a 2D Array
 		for (let i = 0; i < lowestPriority + 1; i++) {
-			calendars[i] = {}
+			calendars[i] = []
 		}
+		// Objecto of Objects
+		// for (let i = 0; i < lowestPriority + 1; i++) {
+		// 	calendars[i] = {}
+		// }
 		console.log(`\ttotalCalendars : ${totalCalendars}`)
 		console.log(`\tlowestPriority : ${lowestPriority}`)
 
@@ -70,13 +77,13 @@ const getData = async (auth) => {
 			let aux = 0
 			for (let j = 0; j <= +lowestPriority; j++) {
 				if (+calendarItem.summary.slice(-1) === j) {
-					calendars[j][aux] = new Calendar(
-						calendarItem.summary,
-						calendarItem.id
-					)
-					// calendars[j].push(
-					// 	new Calendar(calendarItem.summary, calendarItem.id)
+					// calendars[j][aux] = new Calendar(
+					// 	calendarItem.summary,
+					// 	calendarItem.id
 					// )
+					calendars[j].push(
+						new Calendar(calendarItem.summary, calendarItem.id)
+					)
 					aux++
 				}
 			}
@@ -96,16 +103,15 @@ const getData = async (auth) => {
 		 *********************************************/
 		console.log(`\nChecking all events in all calendars\n`)
 		for (let i = 0; i < +lowestPriority + 1; i++) {
-			const calendarsLength = Object.keys(calendars[i]).length
-			for (let j = 0; j < calendarsLength; j++) {
-				// for (let j = 0; j < calendars[i].length; j++) {
+			// const calendarsLength = Object.keys(calendars[i]).length
+			// for (let j = 0; j < calendarsLength; j++) {
+			for (let j = 0; j < calendars[i].length; j++) {
 				const cal = calendars[i][j]
-				// const cal = calendars[i][j]
 				// console.log(`calendars[${i}][${j}] : ${cal.summary}`)
 				const listEventsResponse = await calendar.events.list({
 					calendarId: cal.id,
 					timeMin: new Date().toISOString(),
-					timeMax: futureDay(),
+					timeMax: futureDay(14, false),
 					// maxResults: 10,
 					singleEvents: true,
 					orderBy: "startTime",
@@ -204,6 +210,7 @@ const getData = async (auth) => {
 let dayEvents = []
 
 function mainProcess(calendars, days = 14) {
+	console.log(`\n\n\n>-------MAIN PROCESS------<\n\n`)
 	// turn dayEvents into a 2D array
 	for (let i = 0; i < calendars.length; i++) {
 		dayEvents[i] = []
